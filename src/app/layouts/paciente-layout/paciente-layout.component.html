@@ -1,0 +1,109 @@
+<!-- Wrapper Principal (Mismo fondo que el Dashboard para continuidad) -->
+<div class="min-h-screen w-full relative bg-white font-sans selection:bg-black selection:text-white">
+
+    <!-- 1. FONDO ATMOSFÉRICO (Continuidad visual con el Dashboard) -->
+    <div class="absolute inset-0 pointer-events-none z-0 fixed">
+        <div class="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-linears.vercel.app/noise.svg')]"></div>
+        <div
+            class="absolute top-[-10%] right-[10%] w-[60vw] h-[60vw] rounded-full bg-gray-50 blur-[120px] mix-blend-multiply">
+        </div>
+    </div>
+
+    <!-- Navbar Fijo -->
+    <div class="relative z-50">
+        <app-home-navbar />
+    </div>
+
+    <!-- 2. TABS DE NAVEGACIÓN (Floating Dock) -->
+    <!-- Ajuste de 'top' y 'pt' para dar aire respecto al header -->
+    <div class="relative z-40 pt-32 pb-8 px-6 lg:px-12 pointer-events-none">
+
+        <!-- Contenedor alineado al Dashboard (max-w-5xl) -->
+        <div class="max-w-5xl mx-auto pointer-events-auto">
+
+            <!-- La Cápsula Flotante -->
+            <nav
+                class="flex items-center justify-between p-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-gray-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] overflow-hidden">
+
+                <!-- Lista de Links (Scroll horizontal oculto para móviles) -->
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-gradient px-1">
+
+                    <!-- ITEM: Dashboard -->
+                    <a routerLink="/paciente" routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        [routerLinkActiveOptions]="{exact: true}"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Dashboard
+                    </a>
+
+                    <!-- ITEM: Rutina -->
+                    <a routerLink="/paciente/rutina" routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Rutina
+                    </a>
+
+                    <!-- ITEM: Citas -->
+                    <a routerLink="/paciente/citas" routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Agenda
+                    </a>
+
+                    <!-- ITEM: Tratamientos -->
+                    <a routerLink="/paciente/tratamientos"
+                        routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Tratamientos
+                    </a>
+
+                    <!-- ITEM: Mi Viaje (Antes Progreso) -->
+                    <a routerLink="/paciente/mi-viaje" routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Mi Viaje
+                    </a>
+
+                    <!-- ITEM: Historial -->
+                    <a routerLink="/paciente/historial-medico"
+                        routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Historial
+                    </a>
+
+                    <!-- ITEM: Legal -->
+                    <a routerLink="/paciente/documentos"
+                        routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Legal
+                    </a>
+
+                    <!-- Otros items ocultos en desktop pequeño o agrupados -->
+                    <a routerLink="/paciente/perfil" routerLinkActive="bg-black text-white shadow-lg shadow-black/20"
+                        class="px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-black transition-all duration-300 whitespace-nowrap">
+                        Perfil
+                    </a>
+                </div>
+
+                <!-- Botón CTA (Separado visualmente) -->
+                <div class="hidden md:flex pl-2 ml-2 border-l border-gray-100">
+                    <button
+                        class="group flex items-center gap-2 px-5 py-2.5 rounded-full bg-transparent hover:bg-gray-50 text-[10px] font-bold uppercase tracking-[0.15em] text-black transition-all duration-300">
+                        <span>Solicitar Turno</span>
+                        <div
+                            class="size-5 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+
+            </nav>
+        </div>
+    </div>
+
+    <!-- 3. CONTENIDO RENDERIZADO (Router Outlet) -->
+    <!-- Sin padding extra superior porque ya lo dimos en el nav, alineado max-w-5xl -->
+    <div class="relative z-10 w-full max-w-5xl mx-auto">
+        <router-outlet />
+    </div>
+
+</div>

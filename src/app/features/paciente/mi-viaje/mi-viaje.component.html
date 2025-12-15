@@ -1,0 +1,91 @@
+<div class="relative w-full mx-auto p-6 max-w-4xl animate-in fade-in duration-500">
+
+    <!-- Header -->
+    <div class="mb-10">
+        <h2 class="text-2xl font-light text-black tracking-tight flex items-center gap-2">
+            Mi Viaje Estético
+        </h2>
+        <p class="text-xs text-gray-500 font-light mt-1 max-w-lg">
+            Una línea de tiempo visual de tus tratamientos y evolución.
+        </p>
+    </div>
+
+    <!-- Timeline Container -->
+    <div class="relative pl-8 border-l border-gray-100 space-y-12">
+
+        @for (event of events(); track event.title) {
+        <div class="relative group">
+            <!-- Dot on Timeline -->
+            <div
+                class="absolute -left-[37px] top-1 size-4 rounded-full border-[3px] border-white bg-gray-200 group-hover:bg-black group-hover:scale-110 transition-all duration-300 shadow-sm">
+            </div>
+
+            <!-- Date Label -->
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    {{ event.date | date:'mediumDate' }}
+                </span>
+                <span
+                    class="px-2 py-0.5 rounded-full bg-gray-50 text-[9px] font-medium text-gray-500 uppercase tracking-wide border border-gray-100">
+                    Hace {{ getDaysAgo(event.date) }} días
+                </span>
+            </div>
+
+            <!-- Card Content -->
+            <div
+                class="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Text Content -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900">{{ event.title }}</h3>
+                        <p class="text-sm text-gray-500 font-light mt-2 leading-relaxed">
+                            {{ event.description }}
+                        </p>
+
+                        <!-- Badges/Tags -->
+                        <div class="mt-4 flex gap-2">
+                            <span
+                                class="px-2 py-1 rounded-md bg-gray-50 text-[10px] font-medium uppercase tracking-wide text-gray-600">
+                                {{ event.type }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Before/After Visualization (if available) -->
+                    @if (event.beforeAfter) {
+                    <div class="w-full md:w-64 shrink-0">
+                        <div
+                            class="relative aspect-video rounded-xl overflow-hidden bg-gray-100 group/image cursor-pointer">
+                            <!-- Here we would implement a real slider, for now just showing side-by-side or 'After' image -->
+                            <div class="absolute inset-0 flex">
+                                <div
+                                    class="w-1/2 h-full bg-gray-200 flex items-center justify-center text-[9px] text-gray-400">
+                                    ANTES</div>
+                                <div
+                                    class="w-1/2 h-full bg-gray-300 flex items-center justify-center text-[9px] text-white">
+                                    DESPUÉS</div>
+                            </div>
+
+                            <!-- Overlay Label -->
+                            <div
+                                class="absolute bottom-2 left-2 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-lg text-[9px] text-white font-medium">
+                                Ver Comparativa
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Initial Start Node -->
+        <div class="relative pb-4">
+            <div
+                class="absolute -left-[37px] top-1 size-4 rounded-full border-[3px] border-white bg-green-100 shadow-sm">
+            </div>
+            <div class="text-xs text-gray-400 italic">Comienzo de tu transformación</div>
+        </div>
+    </div>
+</div>

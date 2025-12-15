@@ -1,0 +1,411 @@
+<!-- Wrapper Principal -->
+<div class="relative w-full text-gray-900 pb-20">
+
+    <!-- CONTENIDO CENTRADO -->
+    <div class="relative w-full mx-auto lg:px-12 pt-8">
+
+        <!-- HEADER CON NAVEGACIÓN -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 border-b border-gray-200 pb-6">
+            <div class="flex items-center gap-4">
+                <!-- Botón Volver -->
+                <button type="button" routerLink="/admin/gestion-tratamientos"
+                    class="group flex items-center justify-center size-9 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-black hover:border-black transition-all duration-300">
+                    <svg class="size-4 group-hover:-translate-x-0.5 transition-transform"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                </button>
+
+                <!-- Títulos -->
+                <div class="relative pl-4">
+                    <div class="absolute left-0 top-1.5 bottom-1.5 w-[1.5px] bg-black"></div>
+                    <h2 class="text-xl font-light text-black tracking-tight leading-none">
+                        {{ isEditMode() ? 'Editar Tratamiento' : 'Nuevo Tratamiento' }}
+                    </h2>
+                    <p class="text-[10px] text-gray-500 font-light uppercase tracking-[0.15em] mt-1.5">
+                        Gestión de Servicios
+                    </p>
+                </div>
+            </div>
+
+            <!-- Acciones Principales (Guardar) -->
+            <div class="flex items-center gap-3">
+                <button type="button" routerLink="/admin/gestion-tratamientos"
+                    class="px-5 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 uppercase tracking-wider hover:bg-gray-50 transition-all bg-white">
+                    Cancelar
+                </button>
+                <button type="submit" form="treatmentForm" [disabled]="isSubmitting() || form.invalid"
+                    class="px-5 py-2 rounded-lg bg-black text-white text-xs font-medium uppercase tracking-wider shadow-md hover:bg-gray-800 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isSubmitting()) {
+                    <svg class="animate-spin size-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    }
+                    <span>{{ isSubmitting() ? 'Guardando...' : (isEditMode() ? 'Actualizar' : 'Crear') }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- FORMULARIO PRINCIPAL -->
+        <form [formGroup]="form" id="treatmentForm" (ngSubmit)="onSubmit()">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+                <!-- COLUMNA IZQUIERDA: CONTENIDO MULTIMEDIA Y ESTADO -->
+                <div
+                    class="lg:col-span-4 space-y-8 lg:border-r lg:border-gray-200 lg:pr-10 lg:sticky lg:top-24 lg:self-start">
+
+                    <!-- Sección Imagen Principal -->
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-full text-left mb-4">
+                            <span
+                                class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Multimedia</span>
+                        </div>
+
+                        <!-- Contenedor Imagen -->
+                        <div class="relative group mb-5 w-full">
+                            <div
+                                class="aspect-4/3 w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-sm transition-all duration-500">
+                                @if (form.get('imagenPrincipal')?.value) {
+                                <img [src]="form.get('imagenPrincipal')?.value"
+                                    class="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    alt="Portada Tratamiento">
+                                } @else {
+                                <div class="size-full flex flex-col items-center justify-center bg-[#111] text-white">
+                                    <svg class="size-8 opacity-50 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                    </svg>
+                                    <span class="text-[9px] uppercase tracking-widest opacity-50">Sin Imagen</span>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Input URL Imagen -->
+                        <div class="w-full space-y-2 mb-4">
+                            <label
+                                class="block text-[10px] font-medium text-gray-500 uppercase tracking-wide text-left">URL
+                                de Imagen Principal</label>
+                            <input type="text" formControlName="imagenPrincipal"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-xs focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300"
+                                placeholder="https://...">
+                            <p class="text-[9px] text-gray-400 text-left italic">Temporalmente ingresa una URL válida
+                                (ej. Cloudinary).</p>
+                        </div>
+
+                        <!-- Input Video Youtube -->
+                        <div class="w-full space-y-2">
+                            <label
+                                class="block text-[10px] font-medium text-gray-500 uppercase tracking-wide text-left">Video
+                                YouTube (Opcional)</label>
+                            <input type="text" formControlName="videoUrl"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-xs focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300"
+                                placeholder="https://youtube.com/watch?v=...">
+
+                            <!-- Preview Video -->
+                            @if (getSafeVideoUrl()) {
+                            <div
+                                class="mt-3 w-full rounded-xl overflow-hidden shadow-sm border border-gray-200 aspect-video bg-black">
+                                <iframe [src]="getSafeVideoUrl()" class="size-full" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                            </div>
+                            <p class="text-[9px] text-green-600 text-left mt-1 font-medium flex items-center gap-1">
+                                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                Video detectado correctamente
+                            </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Línea separadora interna -->
+                    <div class="h-px w-full bg-gray-100"></div>
+
+                    <!-- Sección Visibilidad -->
+                    <div>
+                        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Configuración
+                        </h3>
+
+                        <div class="space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-medium text-gray-900">Activo</span>
+                                    <span class="text-[10px] text-gray-500">Visible publicamente</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" formControlName="activo" class="sr-only peer">
+                                    <div
+                                        class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-medium text-gray-900">Destacado</span>
+                                    <span class="text-[10px] text-gray-500">Mostrar en Home</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" formControlName="destacado" class="sr-only peer">
+                                    <div
+                                        class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Orden de Aparición</label>
+                                <input type="number" formControlName="orden"
+                                    class="py-2 px-3 block w-20 border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: DATOS COMPLETOS -->
+                <div class="lg:col-span-8">
+
+                    <!-- 1. INFORMACIÓN GENERAL -->
+                    <div class="mb-8 border-b border-gray-100 pb-2">
+                        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Detalles Generales
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mb-10">
+                        <!-- Nombre -->
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Nombre
+                                del Tratamiento</label>
+                            <input type="text" formControlName="nombre"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300"
+                                placeholder="Ej. Hifu Facial">
+                        </div>
+
+                        <!-- Categoría -->
+                        <div class="space-y-1.5">
+                            <label
+                                class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Categoría</label>
+                            <div class="relative">
+                                <select formControlName="categoria"
+                                    class="block w-full py-2.5 pl-3 pr-8 bg-white border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black transition-all outline-none appearance-none cursor-pointer capitalize">
+                                    <option value="" disabled>Seleccionar...</option>
+                                    @for(cat of categorias; track cat) {
+                                    <option [value]="cat">{{cat}}</option>
+                                    }
+                                </select>
+                                <div
+                                    class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500">
+                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Etiquetas / Tags -->
+                        <div class="space-y-1.5 mt-4 md:col-span-2">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">
+                                Etiquetas (Opcional - Una por línea)
+                            </label>
+                            <textarea formControlName="etiquetas" rows="3"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="Ej: Manchas&#10;Acné&#10;Antiage"></textarea>
+                            <p class="text-[9px] text-gray-400">Útil para filtros específicos (manchas, botox, etc.)</p>
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Precio
+                                ($)</label>
+                            <input type="number" formControlName="precio"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300">
+                        </div>
+
+                        <!-- Duración -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label
+                                    class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Duración
+                                    (minutos)</label>
+                                @if(getFormattedDuration()) {
+                                <span
+                                    class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 uppercase tracking-wide">
+                                    {{ getFormattedDuration() }}
+                                </span>
+                                }
+                            </div>
+                            <input type="number" formControlName="duracion"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300">
+                        </div>
+
+                        <!-- Sesiones Recomendadas -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Sesiones
+                                Sugeridas</label>
+                            <input type="number" formControlName="sesionesRecomendadas"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300">
+                        </div>
+
+                        <!-- Short Description -->
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label
+                                class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Descripción
+                                Corta (Listados)</label>
+                            <textarea formControlName="descripcionCorta" rows="2"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="Resumen breve para cards..."></textarea>
+                        </div>
+
+                        <!-- Long Description -->
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label
+                                class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Descripción
+                                Completa (Detalle)</label>
+                            <textarea formControlName="descripcion" rows="5"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="Explicación detallada del tratamiento..."></textarea>
+                        </div>
+                    </div>
+
+
+                    <!-- 2. DETALLES CLÍNICOS (Listas) -->
+                    <div class="mb-8 border-b border-gray-100 pb-2">
+                        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Información Clínica
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+                        <!-- Resultados Esperados -->
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label
+                                class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Resultados
+                                Esperados</label>
+                            <input type="text" formControlName="resultadosEsperados"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300"
+                                placeholder="Ej. Piel más firme y luminosa desde la primera sesión...">
+                        </div>
+
+                        <!-- Tiempo Recuperación -->
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Tiempo de
+                                Recuperación</label>
+                            <input type="text" formControlName="tiempoRecuperacion"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300"
+                                placeholder="Ej. Inmediato, puede volver a sus actividades...">
+                        </div>
+
+                        <!-- Beneficios (Lista) -->
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label
+                                class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Beneficios
+                                (Uno por línea)</label>
+                            <textarea formControlName="beneficios" rows="4"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="- Mejora la textura&#10;- Reduce arrugas&#10;- Aumenta colágeno"></textarea>
+                        </div>
+
+                        <!-- Contraindicaciones (Lista) -->
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label
+                                class="block text-[11px] font-medium text-red-500 uppercase tracking-wide">Contraindicaciones
+                                (Uno por línea)</label>
+                            <textarea formControlName="contraindicaciones" rows="3"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="- Embarazo&#10;- Infecciones activas"></textarea>
+                        </div>
+
+                        <!-- Instrucciones Pre (Lista) -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Cuidados
+                                Previos</label>
+                            <textarea formControlName="instruccionesPre" rows="4"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="- Evitar sol 24hs antes&#10;- No usar maquillaje"></textarea>
+                        </div>
+
+                        <!-- Instrucciones Post (Lista) -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide">Cuidados
+                                Posteriores</label>
+                            <textarea formControlName="instruccionesPost" rows="4"
+                                class="py-2.5 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-black focus:ring-1 focus:ring-black bg-white transition-all placeholder:text-gray-300 resize-none"
+                                placeholder="- Usar protector solar&#10;- Hidratar la zona"></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- 3. PROFESIONALES -->
+                    <div class="mb-8 border-b border-gray-100 pb-2">
+                        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Profesionales
+                            Habilitados</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @for(prof of profesionalesDisponibles(); track prof.uid) {
+                        <div (click)="toggleProfesional(prof.uid)"
+                            class="group cursor-pointer relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 bg-white"
+                            [class.border-black]="selectedProfesionales().includes(prof.uid)"
+                            [class.bg-gray-50]="selectedProfesionales().includes(prof.uid)"
+                            [class.border-gray-200]="!selectedProfesionales().includes(prof.uid)">
+
+                            <div
+                                class="size-12 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-gray-100">
+                                @if(prof.fotoPerfil) {
+                                <img [src]="prof.fotoPerfil" class="size-full object-cover">
+                                } @else {
+                                <div
+                                    class="size-full flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100">
+                                    {{prof.nombre.charAt(0)}}
+                                </div>
+                                }
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-gray-900 group-hover:text-black">{{prof.nombre}}
+                                    {{prof.apellido}}</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-[10px] text-gray-500 uppercase tracking-wider">M.N.
+                                        {{prof.numeroMatriculaNacional || '---'}}</p>
+                                </div>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                @if(selectedProfesionales().includes(prof.uid)) {
+                                <div class="size-5 rounded-full bg-black flex items-center justify-center text-white">
+                                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                } @else {
+                                <div class="size-5 rounded-full border-2 border-gray-200 group-hover:border-gray-300">
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        } @empty {
+                        <div
+                            class="col-span-full py-8 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
+                            <p class="text-xs text-gray-400 italic">No hay profesionales disponibles.</p>
+                        </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>

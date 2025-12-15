@@ -1,0 +1,256 @@
+<!-- ========== MAIN CONTENT ========== -->
+<main
+    class="md:ps-[230px] md:hs-overlay-minified:ps-[70px] transition-all duration-500 ease-in-out h-screen flex flex-col bg-[#F9FAFB] relative font-sans">
+
+    <!-- ========== HEADER ==========  -->
+    <header
+        class="md:ms-[230px] xl:hs-overlay-layout-open:me-96 md:hs-overlay-minified:ms-[70px] transition-all duration-500 fixed top-0 inset-x-0 z-50">
+
+        <!-- Contenedor Glassmorphism -->
+        <div
+            class="bg-white/80 backdrop-blur-xl border-b border-white/40 shadow-[0_8px_30px_-8px_rgba(0,0,0,0.03)] transition-all duration-500">
+
+            <!-- Altura ajustada a 64px (Punto medio ideal) -->
+            <nav class="px-5 h-[64px] flex basis-full justify-between items-center w-full mx-auto gap-x-5">
+
+                <!-- SECCIÓN IZQUIERDA -->
+                <div class="flex items-center gap-x-4 min-w-fit">
+                    <!-- Toggle Mobile -->
+                    <button type="button"
+                        class="md:hidden flex justify-center items-center flex-none text-gray-500 hover:text-black hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200 rounded-xl p-2 transition-all duration-300 active:scale-95"
+                        data-hs-overlay="#hs-pro-sidebar">
+                        <svg class="size-4.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Branding -->
+                    <div class="hidden lg:flex flex-col justify-center animate-fade-in-up">
+
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DERECHA (User Dropdown - Compact Luxury) -->
+                <div class="flex items-center gap-x-2">
+
+                    <!-- DROPDOWN PERFIL -->
+                    <div
+                        class="hs-dropdown inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right] relative text-start">
+
+                        <!-- Trigger (Botón cápsula flotante) -->
+                        <button id="hs-dnad" type="button"
+                            class="hs-dropdown-toggle group flex items-center gap-x-3 pl-1.5 pr-3 py-1.5 bg-white/60 hover:bg-white border border-transparent hover:border-gray-200/50 rounded-full transition-all duration-500 shadow-sm hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer outline-none backdrop-blur-md">
+
+                            <!-- Avatar -->
+                            @if (!currentUser()?.fotoPerfil) {
+                            <div
+                                class="relative size-8 rounded-full bg-[#050505] text-white flex items-center justify-center shadow-lg shadow-gray-300 overflow-hidden group-hover:scale-105 transition-transform duration-500 ring-2 ring-white">
+                                <span class="text-[9px] font-medium tracking-widest">{{ currentUser()?.nombre?.charAt(0)
+                                    }}{{ currentUser()?.apellido?.charAt(0) }}</span>
+                                <div
+                                    class="absolute inset-0 bg-linear-to-tr from-white/30 to-transparent pointer-events-none">
+                                </div>
+                            </div>
+                            } @else {
+                            <div
+                                class="relative size-8 rounded-full shadow-lg shadow-gray-300 overflow-hidden group-hover:scale-105 transition-transform duration-500 ring-2 ring-white">
+                                <img [src]="currentUser()?.fotoPerfil" class="size-full object-cover" alt="Avatar">
+                            </div>
+                            }
+
+                            <!-- Texto Trigger -->
+                            <div class="hidden md:flex flex-col items-start text-left gap-0.5">
+                                <span
+                                    class="text-[11px] font-medium text-gray-900 leading-none group-hover:text-black transition-colors tracking-tight">
+                                    {{ currentUser()?.nombre }} {{ currentUser()?.apellido?.charAt(0) }}.
+                                </span>
+                                <span class="text-[8px] text-gray-400 font-normal uppercase tracking-[0.15em]">
+                                    {{ currentUser()?.rol }}
+                                </span>
+                            </div>
+
+                            <!-- Icono Chevron -->
+                            <svg class="hs-dropdown-open:rotate-180 size-2.5 text-gray-400 group-hover:text-black ml-1 transition-all duration-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+
+                        <!-- POPUP MENU -->
+                        <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 hs-dropdown-open:translate-y-0 translate-y-4 w-[260px] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] opacity-0 hidden z-50 
+                    bg-white/80 backdrop-blur-3xl rounded-[32px] 
+                    shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15),0_10px_40px_-10px_rgba(0,0,0,0.05)] 
+                    border border-white/60 mt-4 p-2 transform origin-top-right ring-1 ring-black/5" role="menu"
+                            aria-labelledby="hs-dnad">
+
+                            <!-- 1. CABECERA -->
+                            <div
+                                class="relative pt-6 pb-5 px-4 mb-2 rounded-[24px] bg-gray-50/50 overflow-hidden group isolate border border-gray-100/50">
+
+                                <!-- Fondo Abstracto -->
+                                <div
+                                    class="absolute top-[-50%] left-[-20%] w-[150%] h-[150%] bg-linear-to-b from-gray-200/40 via-transparent to-transparent blur-2xl opacity-60">
+                                </div>
+                                <div
+                                    class="absolute inset-0 opacity-[0.4] bg-[radial-linear(#9ca3af_1px,transparent_1px)] bg-size-14px_14px">
+                                </div>
+
+                                <!-- Avatar Grande -->
+                                <div class="relative z-10 mb-2 group/avatar cursor-default">
+                                    @if (!currentUser()?.fotoPerfil) {
+                                    <div
+                                        class="relative size-[60px] mx-auto bg-[#0A0A0A] text-white rounded-[22px] flex items-center justify-center text-xl font-thin shadow-2xl shadow-gray-400 group-hover/avatar:scale-105 transition-all duration-700 ring-4 ring-white">
+                                        {{ currentUser()?.nombre?.charAt(0) }}{{ currentUser()?.apellido?.charAt(0) }}
+                                    </div>
+                                    } @else {
+                                    <div
+                                        class="relative size-[60px] mx-auto rounded-[22px] overflow-hidden shadow-2xl shadow-gray-400 group-hover/avatar:scale-105 transition-all duration-700 ring-4 ring-white">
+                                        <img [src]="currentUser()?.fotoPerfil" class="size-full object-cover"
+                                            alt="Avatar Grande">
+                                    </div>
+                                    }
+                                </div>
+
+                                <!-- Info Usuario -->
+                                <div class="relative z-10 text-center">
+                                    <h3 class="text-[13px] font-normal text-gray-900 tracking-tight">
+                                        {{ currentUser()?.nombre }} {{ currentUser()?.apellido }}
+                                    </h3>
+                                    <!-- CORREO: Color aumentado (gray-600) -->
+                                    <p class="text-[10px] text-gray-600 font-normal tracking-wide mt-0.5">
+                                        {{ currentUser()?.email }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 2. MENÚ COMPACTO -->
+                            <div class="px-1 space-y-0.5 mb-2">
+
+                                <!-- Item: Perfil -->
+                                <a routerLink="mi-perfil"
+                                    class="group flex items-center gap-x-2 p-1.5 rounded-[18px] hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer">
+                                    <!-- Icono: Sin fondo, solo SVG -->
+                                    <div class="text-gray-400 group-hover:text-black transition-colors duration-300">
+                                        <svg class="size-3.5 group-hover:rotate-6 transition-transform duration-500"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-medium text-gray-500 group-hover:text-black uppercase tracking-widest">
+                                        Mi Perfil
+                                    </span>
+                                </a>
+
+                                <!-- Item: Ajustes -->
+                                <a
+                                    class="group flex items-center gap-x-2 p-1.5 rounded-[18px] hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer">
+                                    <!-- Icono: Sin fondo, solo SVG -->
+                                    <div class="text-gray-400 group-hover:text-black transition-colors duration-300">
+                                        <svg class="size-3.5 group-hover:rotate-90 transition-transform duration-500"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-medium text-gray-500 group-hover:text-black uppercase tracking-widest">
+                                        Ajustes
+                                    </span>
+                                </a>
+
+                                <!-- TEMA: Selector -->
+                                <div class="pt-2 px-1">
+                                    <div
+                                        class="relative flex p-1 bg-gray-50 rounded-[16px] border border-gray-100 shadow-inner">
+                                        <!-- Light (Texto reducido a text-[9px]) -->
+                                        <button type="button" (click)="theme.set('light')" [ngClass]="theme() === 'light' 
+                                ? 'bg-white text-black shadow-sm ring-1 ring-black/5' 
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50 bg-transparent'"
+                                            class="relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[12px] text-[9px] font-medium uppercase tracking-wider transition-all duration-300 ease-out focus:outline-none">
+                                            <svg class="size-3 stroke-2" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="5" />
+                                                <path d="M12 1v2" />
+                                                <path d="M12 21v2" />
+                                                <path d="M4.22 4.22l1.42 1.42" />
+                                                <path d="M18.36 18.36l1.42 1.42" />
+                                                <path d="M1 12h2" />
+                                                <path d="M21 12h2" />
+                                                <path d="M4.22 19.78l1.42-1.42" />
+                                                <path d="M18.36 5.64l1.42-1.42" />
+                                            </svg>
+                                            <span>Light</span>
+                                        </button>
+                                        <!-- Dark (Texto reducido a text-[9px]) -->
+                                        <button type="button" (click)="theme.set('dark')" [ngClass]="theme() === 'dark' 
+                                ? 'bg-[#0f0f0f] text-white shadow-lg shadow-black/20' 
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200/50 bg-transparent'"
+                                            class="relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[12px] text-[9px] font-medium uppercase tracking-wider transition-all duration-300 ease-out focus:outline-none">
+                                            <svg class="size-3 stroke-2" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                                            </svg>
+                                            <span>Dark</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer: Logout (Texto reducido a text-[9px]) -->
+                            <div class="p-1 mt-1 border-t border-gray-50">
+                                <button type="button" (click)="logOut()" #logoutBtn
+                                    (mouseenter)="hoverButton($event, overlay)"
+                                    (mouseleave)="leaveButton($event, overlay)"
+                                    class="relative w-full flex items-center justify-center p-3 rounded-[20px] bg-[#0f0f0f] text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.01] shadow-gray-200 group/logout">
+
+                                    <div class="relative z-10 flex items-center gap-2">
+                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                        </svg>
+                                        <span class="text-[9px] font-medium uppercase tracking-[0.15em]">Cerrar
+                                            Sesión</span>
+                                    </div>
+
+                                    <div #overlay
+                                        class="absolute inset-0 z-20 flex items-center justify-center gap-2 bg-white text-black pointer-events-none"
+                                        style="clip-path: circle(0px at 50% 50%);">
+                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                        </svg>
+                                        <span class="text-[9px] font-medium uppercase tracking-[0.15em]">Cerrar
+                                            Sesión</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <!-- ========== END HEADER ========== -->
+
+    <!-- Ajuste del body para 64px -->
+    <section class="flex-1 pt-16 px-5 bg-white">
+        <router-outlet />
+    </section>
+
+</main>

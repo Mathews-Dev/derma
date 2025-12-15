@@ -1,0 +1,114 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- CALENDARIO -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <!-- Header Mes -->
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-base font-medium text-gray-900 capitalize">
+                {{ mesActual() | date:'MMMM yyyy':'':'es' }}
+            </h3>
+            <div class="flex gap-1">
+                <button type="button" (click)="cambiarMes(-1)"
+                    class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button type="button" (click)="cambiarMes(1)"
+                    class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Días Semana -->
+        <div class="grid grid-cols-7 mb-2">
+            @for (dia of ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']; track dia) {
+            <div class="text-xs font-medium text-gray-400 text-center py-2">
+                {{ dia }}
+            </div>
+            }
+        </div>
+
+        <!-- Grid Días -->
+        <div class="grid grid-cols-7 gap-1">
+            @for (fecha of diasCalendario(); track fecha.toISOString()) {
+            <button type="button" [disabled]="esFechaPasada(fecha) || !esDiaLaboral(fecha)"
+                (click)="seleccionarFecha(fecha)" [ngClass]="{
+                        'bg-black text-white hover:bg-gray-800': esMismoDia(fecha, fechaSeleccionada()),
+                        'text-gray-900 hover:bg-gray-100': !esMismoDia(fecha, fechaSeleccionada()) && !esFechaPasada(fecha) && esDiaLaboral(fecha),
+                        'text-gray-300 cursor-not-allowed': esFechaPasada(fecha) || !esDiaLaboral(fecha),
+                        'opacity-0': fecha.getMonth() !== mesActual().getMonth()
+                    }"
+                class="h-9 w-full rounded-lg text-sm font-medium transition-all flex items-center justify-center relative">
+                {{ fecha.getDate() }}
+
+                @if (esMismoDia(fecha, fechaSeleccionada())) {
+                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-emerald-500"></div>
+                }
+            </button>
+            }
+        </div>
+
+        <div class="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
+            <div class="flex items-center gap-1.5">
+                <div class="size-2 rounded-full bg-black"></div>
+                <span>Seleccionado</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <div class="size-2 rounded-full bg-gray-200"></div>
+                <span>Disponible</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HORARIOS -->
+    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col">
+        <h3 class="text-base font-medium text-gray-900 mb-2">Horarios Disponibles</h3>
+
+        @if (fechaSeleccionada()) {
+        <p class="text-sm text-gray-600 mb-6">
+            Para el {{ fechaSeleccionada() | date:'EEEE d de MMMM':'':'es' }}
+        </p>
+
+        @if (isLoadingSlots()) {
+        <div class="flex-1 flex items-center justify-center">
+            <div class="animate-spin rounded-full size-8 border-2 border-gray-200 border-t-black"></div>
+        </div>
+        } @else if (slotsDelDia().length > 0) {
+        <div class="grid grid-cols-3 gap-3">
+            @for (slot of slotsDelDia(); track slot.hora) {
+            <button type="button" [disabled]="!slot.disponible" (click)="seleccionarHora(slot.hora)" [ngClass]="{
+                                'bg-black text-white shadow-md': horaSeleccionada() === slot.hora,
+                                'bg-white text-gray-900 border border-gray-200 hover:border-black': slot.disponible && horaSeleccionada() !== slot.hora,
+                                'bg-gray-100 text-gray-400 border border-transparent cursor-not-allowed': !slot.disponible
+                            }" class="py-2.5 px-2 rounded-lg text-sm font-medium transition-all text-center">
+                {{ slot.hora }}
+            </button>
+            }
+        </div>
+        } @else {
+        <div class="flex-1 flex flex-col items-center justify-center text-center p-4">
+            <div class="bg-white p-3 rounded-full mb-3">
+                <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="text-sm text-gray-600">No hay horarios disponibles para este día.</p>
+        </div>
+        }
+        } @else {
+        <div class="flex-1 flex flex-col items-center justify-center text-center p-4">
+            <div class="bg-white p-3 rounded-full mb-3">
+                <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <p class="text-sm text-gray-600">Selecciona una fecha en el calendario para ver los horarios.</p>
+        </div>
+        }
+    </div>
+</div>
