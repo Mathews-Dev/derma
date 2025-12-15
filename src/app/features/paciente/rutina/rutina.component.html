@@ -1,0 +1,104 @@
+<div class="relative w-full mx-auto p-6 max-w-4xl animate-in fade-in duration-500">
+
+    <!-- Header Section -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-light text-black tracking-tight flex items-center gap-2">
+                Mi Rutina Diaria
+            </h2>
+            <p class="text-xs text-gray-500 font-light mt-1 uppercase tracking-wider">
+                {{ currentDate() | date:'fullDate' : '' : 'es-ES' | titlecase }}
+            </p>
+        </div>
+
+        <!-- Toggle Switch -->
+        <div class="flex p-1 bg-gray-100 rounded-xl relative">
+            <button (click)="toggleView('manana')"
+                class="relative z-10 px-6 py-2 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-2"
+                [ngClass]="activeView() === 'manana' ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+                Mañana
+            </button>
+            <button (click)="toggleView('noche')"
+                class="relative z-10 px-6 py-2 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-2"
+                [ngClass]="activeView() === 'noche' ? 'bg-black shadow-sm text-white' : 'text-gray-400 hover:text-gray-600'">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                </svg>
+                Noche
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Products Grid -->
+    @if (currentProducts().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (producto of currentProducts(); track producto.nombre; let i = $index) {
+        <div class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+            (click)="markAsDone(producto)">
+
+            <!-- Decorative Background Gradient -->
+            <div
+                class="absolute inset-0 bg-linear-to-br from-transparent to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            </div>
+
+            <div class="relative z-10 flex items-start justify-between">
+                <!-- Icon Box -->
+                <div
+                    class="size-12 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shadow-sm border border-gray-100 group-hover:scale-110 transition-transform duration-300">
+                    {{ getProductIcon(producto.tipo) }}
+                </div>
+
+                <!-- Check Circle (Visual only for now) -->
+                <div
+                    class="size-6 rounded-full border-2 border-gray-200 group-hover:border-black transition-colors flex items-center justify-center">
+                    <div class="size-3 rounded-full bg-black scale-0 group-active:scale-100 transition-transform"></div>
+                </div>
+            </div>
+
+            <div class="relative z-10 mt-6 md:mt-16">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso {{ i + 1 }}</span>
+                <h3 class="text-sm font-medium text-gray-900 mt-1 line-clamp-2 min-h-[40px]">
+                    {{ producto.nombre }}
+                </h3>
+                <div class="flex items-center gap-2 mt-3">
+                    <span
+                        class="px-2 py-1 rounded-md bg-gray-100 text-[10px] text-gray-600 font-medium uppercase tracking-wide">
+                        {{ producto.tipo }}
+                    </span>
+                    @if(producto.frecuencia) {
+                    <span
+                        class="px-2 py-1 rounded-md border border-gray-100 text-[10px] text-gray-400 font-medium tracking-wide">
+                        {{ producto.frecuencia }}
+                    </span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    } @else {
+    <!-- Empty State -->
+    <div
+        class="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+        <div class="size-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-4">
+            <svg class="size-8 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+            </svg>
+        </div>
+        <h3 class="text-sm font-medium text-gray-900">Sin rutina configurada</h3>
+        <p class="text-xs text-gray-500 mt-1 text-center max-w-xs">
+            Tu dermatólogo aún no ha cargado tu rutina de {{ activeView() }}. Consultalo en tu próxima cita.
+        </p>
+    </div>
+    }
+</div>

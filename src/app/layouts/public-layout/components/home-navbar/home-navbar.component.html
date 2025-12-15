@@ -1,0 +1,253 @@
+<!-- Navbar Principal (Glassmorphism "White Fog") -->
+<nav
+    class="fixed top-0 left-0 right-0 z-60 bg-white/80 backdrop-blur-xl border-b border-gray-100 transition-all duration-500">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20"> <!-- Altura aumentada a h-20 para más aire -->
+
+            <!-- 1. LOGO -->
+            <div class="shrink-0">
+                <a class="group flex items-center gap-2 cursor-pointer">
+                    <!-- Icono Abstracto Opcional -->
+                    <div
+                        class="size-8 bg-black text-white rounded-lg flex items-center justify-center font-bold text-xs group-hover:rotate-12 transition-transform duration-500">
+                        D.
+                    </div>
+                    <h1 class="text-lg font-light tracking-widest text-gray-900">
+                        DERMA<span class="font-bold">LUXE</span>
+                    </h1>
+                </a>
+            </div>
+
+            <!-- 2. NAV LINKS (Desktop) -->
+            <div class="hidden md:flex items-center gap-x-10">
+                <a routerLink="/servicios" routerLinkActive="text-black font-medium"
+                    class="text-[11px] font-medium text-gray-500 uppercase tracking-[0.15em] hover:text-black transition-colors duration-300 relative group cursor-pointer">
+                    Servicios
+                    <span
+                        class="absolute -bottom-1 left-0 w-0 h-px bg-black transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a routerLink="/tratamientos" routerLinkActive="text-black font-medium"
+                    class="text-[11px] font-medium text-gray-500 uppercase tracking-[0.15em] hover:text-black transition-colors duration-300 relative group cursor-pointer">
+                    Tratamientos
+                    <span
+                        class="absolute -bottom-1 left-0 w-0 h-px bg-black transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a routerLink="/nosotros" routerLinkActive="text-black font-medium"
+                    class="text-[11px] font-medium text-gray-500 uppercase tracking-[0.15em] hover:text-black transition-colors duration-300 relative group cursor-pointer">
+                    Nosotros
+                    <span
+                        class="absolute -bottom-1 left-0 w-0 h-px bg-black transition-all duration-300 group-hover:w-full"></span>
+                </a>
+            </div>
+
+            <!-- 3. ACCIONES (Derecha) -->
+            <div class="flex items-center gap-4">
+
+                <!-- CASO: NO LOGUEADO -->
+                @if (!currentUser()) {
+                <div class="hidden md:flex items-center gap-4">
+                    <button
+                        class="text-xs font-bold uppercase tracking-widest text-gray-900 hover:text-gray-600 transition-colors px-2">
+                        Ingresar
+                    </button>
+                    <button
+                        class="px-6 py-2.5 bg-black text-white text-[10px] font-bold uppercase tracking-[0.15em] rounded-full hover:bg-gray-800 hover:shadow-lg transition-all duration-300">
+                        Reservar
+                    </button>
+                </div>
+                }
+
+                <!-- CASO: LOGUEADO (Tu Dropdown Integrado) -->
+                @if (currentUser()) {
+                <div class="flex items-center gap-x-2">
+
+                    <!-- DROPDOWN PERFIL -->
+                    <div
+                        class="hs-dropdown inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right] relative text-start">
+
+                        <!-- Trigger Button -->
+                        <button id="hs-dnad" type="button"
+                            class="hs-dropdown-toggle group flex items-center gap-x-3 pl-1.5 pr-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-full transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer outline-none">
+
+                            <!-- Avatar Trigger -->
+                            <div
+                                class="relative size-8 rounded-full bg-black text-white flex items-center justify-center shadow-md overflow-hidden group-hover:scale-105 transition-transform duration-300 ring-2 ring-white">
+                                <!-- Initials (Dynamic) -->
+                                <span class="text-[10px] font-semibold tracking-wider">
+                                    {{ currentUser()?.nombre?.[0] || 'U' }}{{ currentUser()?.apellido?.[0] || '' }}
+                                </span>
+                                <!-- Shine Effect -->
+                                <div
+                                    class="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent pointer-events-none">
+                                </div>
+                            </div>
+
+                            <!-- User Name (Trigger) -->
+                            <div class="hidden md:flex flex-col items-start text-left gap-0 mr-1">
+                                <span
+                                    class="text-[11px] font-bold text-gray-900 leading-none group-hover:text-black transition-colors">
+                                    {{ currentUser()?.nombre }}
+                                </span>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">
+                                    Paciente
+                                </span>
+                            </div>
+
+                            <!-- Chevron Icon -->
+                            <svg class="hs-dropdown-open:rotate-180 size-2.5 text-gray-400 group-hover:text-black transition-all duration-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+
+                        <!-- CONTENIDO DEL DROPDOWN -->
+                        <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 hs-dropdown-open:translate-y-0 translate-y-4 w-[260px] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] opacity-0 hidden z-50 
+                                    bg-white/90 backdrop-blur-2xl rounded-[24px] 
+                                    shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1),0_10px_30px_-10px_rgba(0,0,0,0.04)] 
+                                    border border-white/50 mt-4 p-1.5 transform origin-top-right ring-1 ring-black/5"
+                            role="menu" aria-labelledby="hs-dnad">
+
+                            <!-- 1. Cabecera -->
+                            <div
+                                class="relative pt-6 pb-6 px-4 mb-1.5 rounded-[20px] bg-linear-to-b from-gray-50 to-white border border-gray-100 flex flex-col items-center text-center overflow-hidden group">
+                                <!-- Decorative Grid -->
+                                <div
+                                    class="absolute inset-0 opacity-[0.4] bg-[radial-linear(#e5e7eb_1px,transparent_1px)] bg-size-16px_16px">
+                                </div>
+
+                                <!-- Big Avatar -->
+                                <div class="relative z-10 mb-3 group/avatar cursor-default">
+                                    <div
+                                        class="relative size-[56px] bg-[#0A0A0A] text-white rounded-[18px] flex items-center justify-center text-lg font-light shadow-xl shadow-gray-200/80 group-hover/avatar:scale-105 transition-all duration-500">
+                                        {{ currentUser()?.nombre?.[0] || 'U' }}{{ currentUser()?.apellido?.[0] || '' }}
+                                    </div>
+                                </div>
+
+                                <h3 class="relative z-10 text-[13px] font-bold text-gray-900 mt-0.5">
+                                    {{ currentUser()?.nombre }} {{ currentUser()?.apellido }}
+                                </h3>
+                                <p class="relative z-10 text-[10px] text-gray-500 font-medium tracking-wide">
+                                    {{ currentUser()?.email }}
+                                </p>
+                            </div>
+
+                            <!-- 2. Menú Items -->
+                            <div class="px-0.5 space-y-0.5 mb-1.5">
+
+                                <!-- Perfil -->
+                                <a routerLink="/paciente/perfil"
+                                    class="group flex items-center gap-x-3 p-2 rounded-[16px] hover:bg-gray-50 transition-all duration-300 cursor-pointer border border-transparent hover:border-gray-100">
+                                    <div
+                                        class="flex items-center justify-center size-8 rounded-[10px] bg-white border border-gray-200/60 text-gray-400 shadow-sm group-hover:bg-black group-hover:text-white group-hover:shadow-md transition-all duration-300">
+                                        <svg class="size-3.5 group-hover:rotate-6 transition-transform"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-[11px] font-semibold text-gray-600 group-hover:text-black">Mi
+                                        Perfil</span>
+                                </a>
+
+                                <!-- Ajustes -->
+                                <a
+                                    class="group flex items-center gap-x-3 p-2 rounded-[16px] hover:bg-gray-50 transition-all duration-300 cursor-pointer border border-transparent hover:border-gray-100">
+                                    <div
+                                        class="flex items-center justify-center size-8 rounded-[10px] bg-white border border-gray-200/60 text-gray-400 shadow-sm group-hover:bg-black group-hover:text-white group-hover:shadow-md transition-all duration-300">
+                                        <svg class="size-3.5 group-hover:rotate-90 transition-transform"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        class="text-[11px] font-semibold text-gray-600 group-hover:text-black">Ajustes</span>
+                                </a>
+
+                                <!-- TEMA: Toggle -->
+                                <div class="pt-1.5 px-1">
+                                    <div
+                                        class="relative flex p-1 bg-gray-100 rounded-[14px] border border-gray-200/50 shadow-inner">
+                                        <!-- Botón Light -->
+                                        <button type="button" class="bg-white text-black shadow-sm ring-1 ring-gray-200"
+                                            class="relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[10px] font-bold transition-all duration-300 ease-out focus:outline-none">
+                                            <svg class="size-3.5 stroke-2" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="5" />
+                                                <path d="M12 1v2" />
+                                                <path d="M12 21v2" />
+                                                <path d="M4.22 4.22l1.42 1.42" />
+                                                <path d="M18.36 18.36l1.42 1.42" />
+                                                <path d="M1 12h2" />
+                                                <path d="M21 12h2" />
+                                                <path d="M4.22 19.78l1.42-1.42" />
+                                                <path d="M18.36 5.64l1.42-1.42" />
+                                            </svg>
+                                            <span>Light</span>
+                                        </button>
+                                        <!-- Botón Dark -->
+                                        <button type="button"
+                                            class="bg-black text-white shadow-lg shadow-gray-400/50' : 'text-gray-400 hover:text-gray-600 hover:bg-black/5 bg-transparent'"
+                                            class="relative z-10 flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-[10px] text-[10px] font-bold transition-all duration-300 ease-out focus:outline-none">
+                                            <svg class="size-3.5 stroke-2" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                                            </svg>
+                                            <span>Dark</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer Logout (Con lógica conectada) -->
+                            <div class="p-1 mt-1">
+                                <button type="button" (click)="logout()" #logoutBtn
+                                    class="relative w-full flex items-center justify-center p-2.5 rounded-[16px] bg-[#0f0f0f] text-white border border-white overflow-hidden transition-transform duration-300 hover:scale-[1.02]">
+
+                                    <!-- Base Layer -->
+                                    <div class="relative z-10 flex items-center gap-2">
+                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                        </svg>
+                                        <span class="text-[10px] font-bold tracking-wide">Cerrar Sesión</span>
+                                    </div>
+
+                                    <!-- Overlay Effect -->
+                                    <div #overlay
+                                        class="absolute inset-0 z-20 flex items-center justify-center gap-2 bg-white text-black pointer-events-none"
+                                        style="clip-path: circle(0px at 50% 50%);">
+                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                        </svg>
+                                        <span class="text-[10px] font-bold tracking-wide">Cerrar Sesión</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden p-2 rounded-md text-gray-500 hover:text-black transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>

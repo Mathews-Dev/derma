@@ -1,0 +1,5 @@
+/* Tailwind CSS handles most styles */
+:host {
+    display: block;
+    width: 100%;
+}

@@ -1,0 +1,117 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- INFO PROFESIONAL Y FECHA -->
+    <div class="space-y-6">
+        <!-- Card Profesional -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Detalles del Turno</h3>
+
+            <div class="flex items-start gap-4 mb-6">
+                <div class="size-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
+                    @if (profesional.fotoPerfil) {
+                    <img [src]="profesional.fotoPerfil" class="size-full object-cover">
+                    } @else {
+                    <span class="text-lg font-medium text-gray-500">
+                        {{ profesional.nombre[0] }}{{ profesional.apellido[0] }}
+                    </span>
+                    }
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium text-gray-900">
+                        {{ profesional.nombre }} {{ profesional.apellido }}
+                    </h4>
+                    <p class="text-sm text-gray-500">{{ profesional.tituloProfesional }}</p>
+                    <p class="text-xs text-gray-400 mt-1">M.N. {{ profesional.numeroMatriculaNacional }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <div class="bg-white p-2 rounded-lg border border-gray-100">
+                    <svg class="size-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">
+                        {{ fecha | date:'EEEE d MMMM':'':'es' | titlecase }}
+                    </p>
+                    <p class="text-xs text-gray-500">A las {{ hora }} hs</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Adicional -->
+        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
+            <svg class="size-5 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-sm text-blue-800">
+                Recuerda llegar 10 minutos antes de tu cita. Si no puedes asistir, por favor cancela con 24hs de
+                anticipación.
+            </p>
+        </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 h-fit">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+
+            <!-- Motivo -->
+            <div>
+                <label for="motivo" class="block text-sm font-medium text-gray-700 mb-1">
+                    Motivo de Consulta (Opcional)
+                </label>
+                <textarea id="motivo" formControlName="motivo" rows="3"
+                    class="w-full rounded-lg border-gray-200 text-sm focus:border-black focus:ring-black placeholder:text-gray-400"
+                    placeholder="Describe brevemente la razón de tu visita..."></textarea>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <!-- Datos de Contacto y Notificaciones -->
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-xl space-y-4">
+                    <!-- Checkbox WhatsApp (Preferencia) -->
+                    <div class="flex items-start gap-3">
+                        <div class="relative flex items-center h-6">
+                            <input id="notificacionesWhatsApp" type="checkbox" formControlName="notificacionesWhatsApp"
+                                class="size-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600">
+                        </div>
+                        <label for="notificacionesWhatsApp" class="text-sm">
+                            <span class="font-medium text-gray-900">Recibir confirmación por WhatsApp</span>
+                            <p class="text-gray-500 text-xs mt-0.5">Te enviaremos los detalles y recordatorios a tu
+                                celular.
+                            </p>
+                        </label>
+                    </div>
+
+                    <!-- Input Teléfono (Siempre visible y obligatorio) -->
+                    <div class="pl-7">
+                        <label for="telefono" class="block text-xs font-medium text-gray-700 mb-1">
+                            Número de Celular (Obligatorio)
+                        </label>
+                        <input id="telefono" type="tel" formControlName="telefonoNotificaciones"
+                            class="w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            placeholder="+54911...">
+
+                        @if (isFieldInvalid('telefonoNotificaciones')) {
+                        <p class="text-xs text-red-500 mt-1">Ingresa un número válido (ej: +54911...)</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Submit -->
+            <button type="submit" [disabled]="isSubmitting || form.invalid"
+                class="w-full py-3 px-4 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                @if (isSubmitting) {
+                <div class="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Confirmando...
+                } @else {
+                Confirmar Turno
+                }
+            </button>
+        </form>
+    </div>
+</div>

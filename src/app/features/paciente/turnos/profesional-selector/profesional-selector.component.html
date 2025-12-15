@@ -1,0 +1,113 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Selecciona un Profesional</h3>
+        <p class="text-sm text-gray-600">Elige el dermatólogo con quien deseas agendar tu consulta</p>
+    </div>
+
+    <!-- Filtros -->
+    @if (getTitulosUnicos().length > 0) {
+    <div class="flex flex-wrap gap-2">
+        <button type="button" (click)="filtrarPorTitulo('')" [ngClass]="{
+                    'bg-black text-white': filtroTitulo() === '',
+                    'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50': filtroTitulo() !== ''
+                }" class="px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-wide transition-all">
+            Todos
+        </button>
+        @for (titulo of getTitulosUnicos(); track titulo) {
+        <button type="button" (click)="filtrarPorTitulo(titulo)" [ngClass]="{
+                        'bg-black text-white': filtroTitulo() === titulo,
+                        'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50': filtroTitulo() !== titulo
+                    }" class="px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-wide transition-all">
+            {{ titulo }}
+        </button>
+        }
+    </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="flex items-center justify-center py-20">
+        <div class="relative size-12">
+            <div class="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+            <div class="absolute inset-0 rounded-full border-2 border-black border-t-transparent animate-spin"></div>
+        </div>
+    </div>
+    }
+
+    <!-- Grid de Profesionales -->
+    @if (!isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (profesional of profesionalesFiltrados(); track profesional.uid) {
+        <button type="button" (click)="seleccionar(profesional)"
+            class="group relative bg-white rounded-2xl border border-gray-200 p-6 hover:border-black hover:shadow-lg transition-all duration-300 text-left">
+
+            <!-- Foto de Perfil -->
+            <div class="flex items-start gap-4 mb-4">
+                <div class="size-16 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                    @if (profesional.fotoPerfil) {
+                    <img [src]="profesional.fotoPerfil" [alt]="profesional.nombre" class="size-full object-cover">
+                    } @else {
+                    <div class="size-full flex items-center justify-center bg-black text-white text-sm font-medium">
+                        {{ profesional.nombre[0] }}{{ profesional.apellido[0] }}
+                    </div>
+                    }
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-base font-medium text-gray-900 group-hover:text-black transition-colors truncate">
+                        {{ profesional.nombre }} {{ profesional.apellido }}
+                    </h4>
+                    @if (profesional.tituloProfesional) {
+                    <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">
+                        {{ profesional.tituloProfesional }}
+                    </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Info Adicional -->
+            <div class="space-y-2 text-xs text-gray-600">
+                @if (profesional.numeroMatriculaNacional) {
+                <div class="flex items-center gap-2">
+                    <svg class="size-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>M.N. {{ profesional.numeroMatriculaNacional }}</span>
+                </div>
+                }
+                @if (profesional.duracionConsulta) {
+                <div class="flex items-center gap-2">
+                    <svg class="size-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Consulta: {{ profesional.duracionConsulta }} min</span>
+                </div>
+                }
+            </div>
+
+            <!-- Indicador de Hover -->
+            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="size-6 rounded-full bg-black flex items-center justify-center">
+                    <svg class="size-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        </button>
+        } @empty {
+        <div class="col-span-full py-20 text-center">
+            <div class="inline-flex items-center justify-center size-16 rounded-full bg-gray-100 mb-4">
+                <svg class="size-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+            </div>
+            <p class="text-sm text-gray-600">No hay profesionales disponibles</p>
+        </div>
+        }
+    </div>
+    }
+</div>

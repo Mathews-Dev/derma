@@ -1,0 +1,61 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import "preline/variants.css";
+@source "../node_modules/preline/dist/*.js";
+
+/* Variables actualizadas para glassmorfismo nivel medio */
+:root {
+    --radius: 0.75rem;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --border: oklch(0.922 0 0);
+}
+
+/* Fluid Blobs más sutiles para minimalismo alto */
+.fluid-blob-static {
+    position: absolute;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    background: linear-gradient(135deg, rgba(229, 231, 235, 0.25), rgba(209, 213, 219, 0.2));
+    filter: blur(60px);
+}
+
+.blob-1 {
+    width: 600px;
+    height: 600px;
+    top: -15%;
+    left: -10%;
+}
+
+.blob-2 {
+    width: 500px;
+    height: 500px;
+    top: 60%;
+    right: -15%;
+    background: linear-gradient(135deg, rgba(243, 244, 246, 0.3), rgba(229, 231, 235, 0.2));
+}
+
+.blob-3 {
+    width: 550px;
+    height: 550px;
+    bottom: -15%;
+    left: -10%;
+    background: linear-gradient(135deg, rgba(209, 213, 219, 0.25), rgba(229, 231, 235, 0.3));
+}
+
+.blob-4 {
+    width: 450px;
+    height: 450px;
+    top: 15%;
+    right: 15%;
+    background: linear-gradient(135deg, rgba(243, 244, 246, 0.25), rgba(209, 213, 219, 0.3));
+}
+
+/* Mejoras tipográficas para nivel medio */
+@layer base {
+    body {
+        font-feature-settings: "kern" 1, "liga" 1;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}

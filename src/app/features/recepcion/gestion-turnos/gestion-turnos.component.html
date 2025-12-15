@@ -1,0 +1,388 @@
+<!-- Wrapper Principal -->
+<div class="relative w-full">
+
+    <!-- CONTENIDO (Ancho Máximo) -->
+    <div class="relative w-full mx-auto lg:px-12 pt-8 pb-12">
+
+        <!-- HEADER & TOOLBAR -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+
+            <!-- Título & Subtítulo -->
+            <div class="relative pl-4 shrink-0">
+                <div class="absolute left-0 top-1.5 bottom-1.5 w-[1.5px] bg-black"></div>
+                <h1 class="text-2xl font-light text-black tracking-tight leading-none">
+                    Gestión de Turnos
+                </h1>
+                <p class="text-[11px] text-gray-500 font-light uppercase tracking-[0.15em] mt-1.5">
+                    Recepción & Agenda
+                </p>
+            </div>
+
+            <!-- Zona Derecha: Buscador y Filtros -->
+            <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto items-end md:items-center">
+
+                <!-- Buscador (Visual) -->
+                <div class="w-full md:w-64 group relative">
+                    <div class="relative transition-all duration-300 transform group-focus-within:-translate-y-0.5">
+                        <input type="text" (input)="onBusquedaChange($event)"
+                            class="block w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-full text-xs font-normal text-black placeholder:text-gray-400 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] focus:ring-1 focus:ring-black/5 focus:border-black/20 transition-all outline-none"
+                            placeholder="Buscar paciente o DNI...">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                            <svg class="size-3.5 text-gray-400 group-focus-within:text-black transition-colors duration-300"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtro de Fecha -->
+                <div class="relative group">
+                    <select #fechaSelect (change)="setFiltroFecha($any(fechaSelect.value))"
+                        class="appearance-none pl-4 pr-10 py-2 bg-white border border-gray-200 rounded-full text-xs font-normal text-black shadow-sm focus:ring-1 focus:ring-black/5 focus:border-black/20 outline-none cursor-pointer hover:bg-gray-50 transition-all">
+                        <option value="hoy">Hoy</option>
+                        <option value="ayer">Ayer</option>
+                        <option value="semana">Última Semana</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="size-3 text-gray-400 group-hover:text-black transition-colors" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="flex flex-wrap gap-2">
+                    <!-- Botón Todos (Color Ajustado: Gris Oscuro en lugar de Negro puro para suavizar) -->
+                    <button (click)="setFiltro('todos')"
+                        class="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border"
+                        [class]="filtroEstado() === 'todos' 
+                            ? 'bg-gray-800 text-white border-gray-800 shadow-md transform scale-105' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-black'">
+                        Todos <span class="ml-1 opacity-60 font-normal">({{ contadores().todos }})</span>
+                    </button>
+
+                    <!-- Botón Pendientes -->
+                    <button (click)="setFiltro(EstadoTurno.PENDIENTE)"
+                        class="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border"
+                        [class]="filtroEstado() === EstadoTurno.PENDIENTE 
+                            ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-amber-200 hover:text-amber-600'">
+                        Pendientes <span class="ml-1 opacity-60 font-normal">({{ contadores().pendientes }})</span>
+                    </button>
+
+                    <!-- Botón Confirmados -->
+                    <button (click)="setFiltro(EstadoTurno.CONFIRMADO)"
+                        class="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border"
+                        [class]="filtroEstado() === EstadoTurno.CONFIRMADO 
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200 shadow-sm' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-200 hover:text-emerald-600'">
+                        Confirmados <span class="ml-1 opacity-60 font-normal">({{ contadores().confirmados }})</span>
+                    </button>
+
+                    <!-- Botón Cancelados -->
+                    <button (click)="setFiltro(EstadoTurno.CANCELADO)"
+                        class="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border"
+                        [class]="filtroEstado() === EstadoTurno.CANCELADO 
+                            ? 'bg-red-100 text-red-800 border-red-200 shadow-sm' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-red-200 hover:text-red-600'">
+                        Cancelados <span class="ml-1 opacity-60 font-normal">({{ contadores().cancelados }})</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOADING STATE -->
+        @if(isLoading()) {
+        <div
+            class="flex flex-col items-center justify-center h-80 rounded-[24px] border border-dashed border-gray-200 bg-white/40">
+            <div class="relative size-10">
+                <div class="absolute inset-0 rounded-full border border-gray-200"></div>
+                <div class="absolute inset-0 rounded-full border border-black border-t-transparent animate-spin"></div>
+            </div>
+            <span class="mt-4 text-[10px] font-medium text-gray-500 uppercase tracking-widest animate-pulse">Cargando
+                Turnos</span>
+        </div>
+        } @else {
+
+        <!-- TABLA CARD CONTAINER -->
+        <div
+            class="bg-white rounded-[24px] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.03)] border border-gray-100 overflow-hidden flex flex-col">
+
+            <!-- ZONA DE SCROLL HORIZONTAL -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full align-middle">
+
+                    <!-- Header Tabla -->
+                    <thead class="bg-white border-b border-gray-100 sticky top-0 z-10">
+                        <tr>
+                            <th scope="col"
+                                class="px-8 py-5 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">
+                                Paciente
+                            </th>
+                            <th scope="col"
+                                class="px-8 py-5 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500 hidden md:table-cell">
+                                Profesional
+                            </th>
+                            <th scope="col"
+                                class="px-8 py-5 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">
+                                Fecha y Hora
+                            </th>
+                            <th scope="col"
+                                class="px-8 py-5 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">
+                                Estado
+                            </th>
+                            <th scope="col"
+                                class="px-8 py-5 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500 w-24">
+                                Acción
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <!-- Body Tabla -->
+                    <tbody class="divide-y divide-gray-50">
+                        @for (turno of turnosPaginados(); track turno.id) {
+                        <tr class="group hover:bg-gray-50 transition-colors duration-300 ease-out">
+
+                            <!-- Columna: Paciente & WhatsApp -->
+                            <td class="px-8 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="shrink-0 relative transition-transform duration-300 group-hover:scale-105">
+                                        <div
+                                            class="size-10 rounded-[12px] overflow-hidden bg-gray-100 border border-gray-100 shadow-sm flex items-center justify-center text-gray-400 font-medium text-xs">
+                                            @if (getPaciente(turno.pacienteId); as paciente) {
+                                            {{ paciente.nombre.charAt(0) }}{{ paciente.apellido.charAt(0) }}
+                                            } @else {
+                                            ?
+                                            }
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @if (getPaciente(turno.pacienteId); as paciente) {
+                                        <p
+                                            class="text-[13px] font-medium text-gray-900 group-hover:text-black transition-colors">
+                                            {{ paciente.nombre }} {{ paciente.apellido }}
+                                        </p>
+                                        } @else {
+                                        <p class="text-[13px] text-gray-400">Cargando...</p>
+                                        }
+
+                                        <!-- Teléfono + Icono WA -->
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <p class="text-[11px] text-gray-500 font-normal tracking-wide">
+                                                {{ turno.telefonoNotificaciones || 'Sin contacto' }}
+                                            </p>
+                                            @if (turno.notificacionesWhatsApp) {
+                                            <div class="text-emerald-500" title="WhatsApp Habilitado">
+                                                <svg class="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path
+                                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                                </svg>
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Columna: Profesional -->
+                            <td class="px-8 py-4 whitespace-nowrap hidden md:table-cell">
+                                @if (getProfesional(turno.profesionalId); as prof) {
+                                <div class="flex flex-col gap-0.5">
+                                    <p class="text-[13px] font-normal text-gray-700">
+                                        {{ prof.nombre }} {{ prof.apellido }}
+                                    </p>
+                                    <p class="text-[10px] font-medium text-gray-400 tracking-wide uppercase">
+                                        {{ prof.tituloProfesional }}
+                                    </p>
+                                </div>
+                                } @else {
+                                <span class="text-gray-300 text-xs">—</span>
+                                }
+                            </td>
+
+                            <!-- Columna: Fecha y Hora -->
+                            <td class="px-8 py-4 whitespace-nowrap">
+                                <div class="flex flex-col gap-0.5">
+                                    <p class="text-[13px] font-medium text-gray-900 tabular-nums">
+                                        {{ formatFecha(turno.fecha) }}
+                                    </p>
+                                    <p class="text-[11px] text-gray-500 font-normal flex items-center gap-1">
+                                        <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span class="tabular-nums">{{ turno.horaInicio }} hs</span>
+                                    </p>
+                                </div>
+                            </td>
+
+                            <!-- Columna: Estado -->
+                            <td class="px-8 py-4 whitespace-nowrap">
+                                @if (turno.estado === EstadoTurno.CONFIRMADO) {
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50/50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-widest">
+                                    <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                    Confirmado
+                                </span>
+                                } @else if (turno.estado === EstadoTurno.PENDIENTE) {
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50/50 border border-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-widest">
+                                    <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                    Pendiente
+                                </span>
+                                } @else if (turno.estado === EstadoTurno.CANCELADO) {
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-gray-500 text-[9px] font-bold uppercase tracking-widest">
+                                    <span class="size-1.5 rounded-full bg-red-400"></span>
+                                    Cancelado
+                                </span>
+                                } @else {
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50/50 border border-blue-100 text-blue-700 text-[9px] font-bold uppercase tracking-widest">
+                                    <span class="size-1.5 rounded-full bg-blue-500"></span>
+                                    {{ turno.estado }}
+                                </span>
+                                }
+                            </td>
+
+                            <!-- Columna: Acciones (Botón + Dropdown) -->
+                            <td class="px-8 py-4 whitespace-nowrap text-right">
+                                <div class="flex items-center justify-end gap-3">
+
+                                    <!-- Botón Confirmar (Visible solo si pendiente) -->
+                                    @if (turno.estado === EstadoTurno.PENDIENTE) {
+                                    <button (click)="confirmarTurno(turno)" [disabled]="procesando() === turno.id"
+                                        title="Confirmar Turno"
+                                        class="group flex items-center justify-center size-8 rounded-lg bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm">
+                                        @if (procesando() === turno.id) {
+                                        <div
+                                            class="size-3 border-2 border-white/30 border-t-white rounded-full animate-spin">
+                                        </div>
+                                        } @else {
+                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m4.5 12.75 6 6 9-13.5" />
+                                        </svg>
+                                        }
+                                    </button>
+                                    }
+
+                                    <!-- Dropdown Menu (3 Puntos) -->
+                                    @if (turno.estado !== EstadoTurno.CANCELADO && turno.estado !==
+                                    EstadoTurno.COMPLETADO) {
+                                    <div class="hs-dropdown relative inline-flex [--placement:bottom-right]">
+                                        <button id="hs-table-dropdown-{{turno.id}}" type="button"
+                                            class="hs-dropdown-toggle size-8 inline-flex justify-center items-center rounded-lg text-gray-400 hover:text-black hover:bg-white hover:shadow-sm transition-all duration-200 border border-transparent hover:border-gray-100">
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown Content -->
+                                        <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-[170px] z-50 
+                                            bg-white border border-gray-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] rounded-[18px] p-1.5 mt-2 overflow-hidden"
+                                            [attr.aria-labelledby]="'hs-table-dropdown-' + turno.id">
+
+                                            <div
+                                                class="absolute inset-0 opacity-[0.02] bg-[url('https://grainy-linears.vercel.app/noise.svg')] pointer-events-none">
+                                            </div>
+
+                                            <div
+                                                class="relative px-3 py-2 mb-1 border-b border-gray-50 flex items-center justify-between">
+                                                <span
+                                                    class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">Opciones</span>
+                                                <div class="size-1 bg-gray-200 rounded-full"></div>
+                                            </div>
+
+                                            <!-- Solo opción Cancelar -->
+                                            <a class="group relative flex items-center gap-x-3 py-2.5 px-3 rounded-[12px] hover:bg-red-50/60 transition-all duration-300 cursor-pointer"
+                                                (click)="cancelarTurno(turno)">
+                                                <div
+                                                    class="text-gray-400 group-hover:text-red-500 transition-colors duration-300">
+                                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-[10px] font-medium text-gray-500 group-hover:text-red-600 uppercase tracking-widest transition-colors">
+                                                    Cancelar
+                                                </span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="5" class="py-24 text-center">
+                                <div class="flex flex-col items-center justify-center opacity-50">
+                                    <div class="size-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+                                        <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-900 font-medium">No hay turnos disponibles</p>
+                                    <p class="text-xs text-gray-500 mt-1">Prueba cambiando los filtros de búsqueda</p>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINACIÓN -->
+            <div class="px-8 py-4 border-t border-gray-100 bg-white flex items-center gap-3 sticky bottom-0 z-10">
+
+                <!-- Botón Previous -->
+                <button type="button" [disabled]="paginaActual() === 1" (click)="irAPagina(paginaActual() - 1)"
+                    class="size-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-300">
+                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+
+                <!-- Números de Página -->
+                <div class="flex items-center gap-1">
+                    @for (page of paginasDisponibles(); track page) {
+                    <button type="button" (click)="irAPagina(page)"
+                        class="size-7 flex items-center justify-center rounded-md text-[10px] font-medium transition-all duration-300"
+                        [ngClass]="paginaActual() === page 
+                        ? 'bg-black text-white shadow-sm' 
+                        : 'text-gray-400 hover:bg-gray-50 hover:text-gray-700'">
+                        {{ page }}
+                    </button>
+                    }
+                </div>
+
+                <!-- Botón Next -->
+                <button type="button" [disabled]="paginaActual() === totalPaginas()"
+                    (click)="irAPagina(paginaActual() + 1)"
+                    class="size-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-300">
+                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</div>

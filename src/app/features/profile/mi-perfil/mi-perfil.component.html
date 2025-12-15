@@ -1,0 +1,234 @@
+<!-- Wrapper Principal -->
+<div class="w-full max-w-4xl mx-auto py-6 px-4 md:px-6 mb-20">
+
+    <!-- Header Avatar & Tabs -->
+    <div class="flex flex-col items-center mb-8">
+        <!-- Avatar Section -->
+        <div class="relative mb-3">
+            <div class="w-28 h-28 rounded-full bg-black overflow-hidden shadow-lg border-4 border-white">
+                @if (imagenBase64Preview()) {
+                <img class="w-full h-full object-cover" [src]="imagenBase64Preview()" alt="Avatar" />
+                } @else {
+                <div class="w-full h-full flex items-center justify-center text-white bg-[#111]">
+                    <span class="text-3xl font-light tracking-widest">
+                        {{ currentUser()?.nombre?.charAt(0) }}{{ currentUser()?.apellido?.charAt(0) }}
+                    </span>
+                </div>
+                }
+            </div>
+            <!-- Botón flotante cámara -->
+            <label
+                class="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50 transition-colors border border-gray-100">
+                <svg class="w-4 h-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                </svg>
+                <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+            </label>
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-900">
+            {{ currentUser()?.nombre }} {{ currentUser()?.apellido }}
+        </h2>
+        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">
+            {{ currentUser()?.rol }}
+        </p>
+
+        <!-- TABS NAV -->
+        @if (isDermatologo) {
+        <div class="flex items-center gap-2 mt-6 p-1 bg-gray-100/80 rounded-full">
+            <button (click)="switchTab('personal')" type="button"
+                class="px-5 py-2 rounded-full text-xs font-medium transition-all duration-300"
+                [ngClass]="activeTab() === 'personal' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900'">
+                Personal
+            </button>
+            <button (click)="switchTab('profesional')" type="button"
+                class="px-5 py-2 rounded-full text-xs font-medium transition-all duration-300"
+                [ngClass]="activeTab() === 'profesional' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900'">
+                Profesional
+            </button>
+        </div>
+        }
+    </div>
+
+
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()"
+        class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+        <!-- ====================== TAB PERSONAL ====================== -->
+        @if (activeTab() === 'personal') {
+        <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Columna Izquierda -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Información Básica</h3>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Nombre</label>
+                        <input type="text" formControlName="nombre"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Apellido</label>
+                        <input type="text" formControlName="apellido"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">DNI</label>
+                        <input type="text" formControlName="dni"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+                </div>
+
+                <!-- Columna Derecha -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Contacto</h3>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Teléfono</label>
+                        <input type="text" formControlName="telefono"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Email</label>
+                        <input type="email" formControlName="email"
+                            class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 cursor-not-allowed">
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+
+
+        <!-- ====================== TAB PROFESIONAL ====================== -->
+        @if (activeTab() === 'profesional') {
+        <div class="space-y-10">
+
+            <!-- 1. Datos de Matrícula -->
+            <div>
+                <h3
+                    class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 pb-2 border-b border-gray-100">
+                    Credenciales & Especialidad
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Matrícula Nacional</label>
+                        <input type="text" formControlName="numeroMatriculaNacional"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Matrícula Provincial</label>
+                        <input type="text" formControlName="numeroMatriculaProvincial"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Duración Consulta (minutos)</label>
+                        <input type="number" formControlName="duracionConsulta"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-medium text-gray-600 ml-1">Título Profesional</label>
+                        <input type="text" formControlName="tituloProfesional"
+                            placeholder="Ej. Cirujano Plástico, Dermatóloga"
+                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Agenda (Schedule) -->
+            <div>
+                <h3
+                    class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 pb-2 border-b border-gray-100">
+                    Agenda Semanal
+                </h3>
+                <app-schedule-selector [initialSchedule]="profileForm.get('horariosLaborales')?.value"
+                    (scheduleChange)="onScheduleChange($event)">
+                </app-schedule-selector>
+            </div>
+
+            <!-- 3. Honorarios -->
+            <div>
+                <div class="flex items-center justify-between mb-6 pb-2 border-b border-gray-100">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Honorarios</h3>
+                    <button type="button" (click)="addHonorario()"
+                        class="text-[10px] font-medium text-black bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition-colors">
+                        + Agregar
+                    </button>
+                </div>
+
+                <div class="space-y-3" formArrayName="honorarios">
+                    @for (item of honorarios.controls; track $index) {
+                    <div [formGroupName]="$index"
+                        class="flex gap-4 items-center animate-in fade-in slide-in-from-top-2">
+                        <div class="flex-1">
+                            <input type="text" formControlName="nombre" placeholder="Nombre Tratamiento"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all">
+                        </div>
+                        <div class="w-32">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                <input type="number" formControlName="precio" placeholder="0"
+                                    class="w-full pl-7 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all text-right">
+                            </div>
+                        </div>
+                        <button type="button" (click)="removeHonorario($index)"
+                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    } @empty {
+                    <div
+                        class="text-center py-6 text-sm text-gray-400 italic bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        No hay honorarios registrados.
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 4. Documentación -->
+            <div>
+                <h3
+                    class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 pb-2 border-b border-gray-100">
+                    Documentación Digital
+                </h3>
+
+                <app-professional-docs [documents]="profileForm.get('documentos')?.value" [editable]="true"
+                    (documentsChange)="updateDocs($event)">
+                </app-professional-docs>
+            </div>
+
+        </div>
+        }
+
+        <!-- Actions -->
+        <div class="mt-12 flex justify-center">
+            <button type="submit" [disabled]="isSubmitting"
+                class="px-12 py-3 rounded-full bg-black text-white font-semibold text-sm shadow-md hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                @if (isSubmitting) {
+                <svg class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                }
+                Guardar Cambios
+            </button>
+        </div>
+
+    </form>
+</div>

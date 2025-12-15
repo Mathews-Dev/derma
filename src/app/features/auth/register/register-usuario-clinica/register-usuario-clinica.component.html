@@ -1,0 +1,263 @@
+<div class="min-h-screen flex items-center justify-center p-4 bg-gray-50/50">
+
+    <div
+        class="w-full max-w-[850px] bg-white rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex overflow-hidden ring-1 ring-black/5">
+
+        <div class="hidden md:flex w-[40%] bg-[#080808] relative items-center justify-center overflow-hidden">
+
+            <!-- Arte Abstracto (CSS Puro) -->
+            <div class="absolute inset-0 w-full h-full opacity-60">
+                <!-- Gradiente base -->
+                <div class="absolute inset-0 bg-linear-to-br from-[#1a1a1a] via-black to-[#050505]"></div>
+                <!-- Blobs de luz -->
+                <div
+                    class="absolute top-[-20%] right-[-20%] w-[300px] h-[300px] bg-gray-800/40 rounded-full blur-[80px]">
+                </div>
+                <div
+                    class="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] bg-gray-700/20 rounded-full blur-[60px]">
+                </div>
+                <!-- Ruido de textura -->
+                <div
+                    class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay">
+                </div>
+                <!-- Líneas decorativas sutiles -->
+                <svg class="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="0" y1="100" x2="100" y2="0" stroke="white" stroke-width="0.2" />
+                </svg>
+            </div>
+
+            <!-- Logo / Icono Centrado -->
+            <div class="relative z-10 flex flex-col items-center gap-4 p-8 text-center">
+                <div
+                    class="w-20 h-20 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+                    <img src="assets/images/icon-white.png" alt="icon"
+                        class="w-10 h-10 object-contain drop-shadow-lg opacity-90">
+                </div>
+                <!-- Texto decorativo opcional -->
+                <div class="space-y-1">
+                    <p class="text-white text-lg font-light tracking-widest">DERMA</p>
+                    <div class="h-0.5 w-8 bg-white/20 mx-auto rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================================================
+             COLUMNA DERECHA: FORMULARIO (60%)
+             Fondo Blanco Puro
+        ============================================================== -->
+        <div class="w-full md:w-[60%] bg-white p-8 sm:p-10 flex flex-col justify-center relative">
+
+            <!-- Estado de Carga -->
+            @if (isLoading()) {
+            <div class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                <p class="text-xs text-gray-500 font-medium tracking-widest animate-pulse">VALIDANDO INVITACIÓN...</p>
+            </div>
+            }
+
+            @if (invitacion() && !error()) {
+            <div class="w-full animate-in fade-in slide-in-from-right-4 duration-500">
+
+                <!-- Header del Formulario -->
+                <div class="mb-6 flex justify-between items-end border-b border-gray-100 pb-2">
+                    <div>
+                        <h2 class="text-2xl font-light text-gray-900 tracking-tight">
+                            Crear cuenta
+                        </h2>
+                        <p class="text-[12px] text-gray-400 font-light mt-1">
+                            Completa tus datos para finalizar el acceso.
+                        </p>
+                    </div>
+                    <!-- Badge de Rol -->
+                    <div class="flex flex-col items-end">
+                        <span class="text-[9px] font-bold text-gray-300 uppercase tracking-wider">Rol</span>
+                        <span class="text-[11px] font-light text-black bg-gray-100 px-2 py-1 rounded-md">
+                            {{ invitacion()?.rol || 'USUARIO' | uppercase }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- FORMULARIO COMPACTO (Grid System) -->
+                <form [formGroup]="formulario" (ngSubmit)="onSubmit()" class="space-y-3">
+
+                    <!-- Fila 1: Nombre y Apellido -->
+                    <div class="grid grid-cols-2 gap-3">
+
+                        <div class="space-y-[6px]">
+                            <label for="register-nombre"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                Nombre
+                            </label>
+                            <input id="register-nombre" type="text" placeholder="Juan" formControlName="nombre"
+                                class="w-full h-[38px] bg-white/70 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out rounded-xl px-[13px] text-[12px] placeholder:text-gray-400 shadow-sm hover:shadow-md">
+                            @if (formulario.get('nombre')?.hasError('required') &&
+                            formulario.get('nombre')?.touched) {
+                            <p class="text-[9px] text-red-500 mt-1 ml-1 font-medium animate-fade-in">Requerido</p>
+                            }
+                        </div>
+                        <!-- Apellido -->
+                        <div class="space-y-[6px]">
+                            <label for="register-apellido"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                Apellido
+                            </label>
+                            <input id="register-apellido" type="text" placeholder="Pérez" formControlName="apellido"
+                                class="w-full h-[38px] bg-white/70 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out rounded-xl px-[13px] text-[12px] placeholder:text-gray-400 shadow-sm hover:shadow-md">
+                            @if (formulario.get('apellido')?.hasError('required') &&
+                            formulario.get('apellido')?.touched) {
+                            <p class="text-[9px] text-red-500 mt-1 ml-1 font-medium animate-fade-in">Requerido</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: DNI y Teléfono (30% / 70%) -->
+                    <div class="flex gap-3">
+                        <div class="w-[35%] space-y-1">
+                            <label for="register-dni"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                DNI
+                            </label>
+                            <input id="register-dni" type="text" placeholder="12345678" formControlName="dni"
+                                class="w-full h-[38px] bg-white/70 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out rounded-xl px-[13px] text-[12px] placeholder:text-gray-400 shadow-sm hover:shadow-md">
+                            @if (formulario.get('dni')?.hasError('required') && formulario.get('dni')?.touched) {
+                            <p class="text-[9px] text-red-500 mt-1 ml-1 font-medium animate-fade-in">Requerido</p>
+                            }
+                        </div>
+
+
+                        <div class="w-[65%] space-y-1">
+                            <label for="register-telefono"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                Teléfono
+                            </label>
+                            <div class="relative flex rounded-xl shadow-sm group">
+                                <div class="relative">
+                                    <button type="button" (click)="toggleDropdown()"
+                                        class="inline-flex items-center gap-x-2 px-[16px] h-[38px] bg-white/70 backdrop-blur-sm text-gray-600 rounded-l-xl hover:bg-white focus:z-10 focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out hover:shadow-md">
+                                        <img [src]="selectedCountry().flagUrl" [alt]="selectedCountry().name"
+                                            class="w-4 h-[11px] object-cover rounded-[2px] shadow-sm">
+                                        <span class="text-[10px] font-medium">{{ selectedCountry().dialCode
+                                            }}</span>
+                                        @if (selectedCountry().code === 'AR') {
+                                        <span class="text-[10px] font-medium">9</span>
+                                        }
+                                        <svg class="size-7 text-gray-400 group-hover:text-gray-600 transition-all duration-300"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M6 9l6 6 6-6" />
+                                        </svg>
+
+                                    </button>
+
+                                    @if (isDropdownOpen()) {
+                                    <div
+                                        class="absolute z-50 mt-1 w-[180px] max-h-[200px] overflow-y-auto bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 p-1 space-y-0.5 animate-fade-in">
+                                        @for (country of countries; track country.code) {
+                                        <button type="button" (click)="selectCountry(country)"
+                                            class="w-full flex items-center gap-x-[10px] py-[6px] px-[10px] rounded-lg text-[11px] text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition-all duration-200 ease-out">
+                                            <img [src]="country.flagUrl" [alt]="country.name"
+                                                class="w-4 h-[11px] object-cover rounded-[2px]">
+                                            <span class="flex-1 text-left font-medium">{{ country.name }}</span>
+                                            <span class="text-gray-400">{{ country.dialCode }}</span>
+                                        </button>
+                                        }
+                                    </div>
+                                    }
+                                </div>
+
+                                <div
+                                    class="relative w-full flex items-center h-[38px] rounded-r-xl bg-white/70 backdrop-blur-sm focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-200/40 transition-all duration-300 ease-out hover:shadow-md">
+
+                                    <input id="register-telefono" type="tel"
+                                        class="w-full h-full bg-transparent focus:ring-0 px-[13px] text-[12px] text-gray-900 placeholder-gray-400"
+                                        placeholder="11 1234-5678" formControlName="telefono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Email y Pass -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label for="register-email"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                Email
+                            </label>
+                            <input id="register-email" type="email" placeholder="tu@email.com" formControlName="email"
+                                class="w-full h-[38px] bg-white/70 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out rounded-xl px-[13px] text-[12px] placeholder:text-gray-400 shadow-sm hover:shadow-md">
+                            @if (formulario.get('email')?.hasError('required') && formulario.get('email')?.touched)
+                            {
+                            <p class="text-[9px] text-red-500 mt-1 ml-1 font-medium animate-fade-in">Requerido</p>
+                            }
+                        </div>
+                        <div class="space-y-1">
+                            <label for="register-password"
+                                class="text-[10px] font-medium text-gray-700 block tracking-wide ml-1">
+                                Contraseña
+                            </label>
+                            <input id="register-password" type="password" placeholder="••••••••"
+                                formControlName="password"
+                                class="w-full h-[38px] bg-white/70 backdrop-blur-sm focus:bg-white focus:ring-2 focus:ring-blue-200/40 transition-all duration-300 ease-out rounded-xl px-[13px] text-[12px] placeholder:text-gray-400 shadow-sm hover:shadow-md">
+                            @if (formulario.get('password')?.hasError('required') &&
+                            formulario.get('password')?.touched) {
+                            <p class="text-[9px] text-red-500 mt-1 ml-1 font-medium animate-fade-in">Requerido</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Footer & Botón -->
+                    <div class="pt-4 flex items-center justify-between gap-4">
+                        <p class="text-[12px] text-gray-400 font-light leading-relaxed max-w-[200px]">
+                            Al unirte aceptas nuestros términos y condiciones de servicio.
+                        </p>
+
+                        <button type="button" #submitBtn (mouseenter)="hoverButton($event, overlay)"
+                            (mouseleave)="leaveButton($event, overlay)" (click)="onSubmit()"
+                            [disabled]="!formulario.valid || isSubmitting()"
+                            class="relative w-[60px] h-[60px] flex items-center justify-center rounded-full bg-white text-gray-900 border border-gray-900 overflow-hidden transition-transform duration-300 hover:scale-[1.02]">
+
+                            <!-- Base Layer (Black Text) -->
+                            <div class="relative z-10 flex items-center justify-center">
+                                @if (isSubmitting()) {
+                                <svg class="animate-spin h-[20px] w-[20px] text-gray-900"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                                } @else {
+                                <span
+                                    class="tracking-widest text-xs font-extralight group-hover:text-white transition-colors duration-300">
+                                    UNIRSE
+                                </span>
+                                }
+                            </div>
+
+                            <!-- Overlay Layer (Black Bg + White Text) -->
+                            <div #overlay
+                                class="absolute inset-0 z-20 flex items-center justify-center bg-[#0f0f0f] text-white pointer-events-none"
+                                style="clip-path: circle(0px at 50% 50%);">
+                                @if (isSubmitting()) {
+                                <svg class="animate-spin h-[20px] w-[20px] text-white"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                                } @else {
+                                <span class="tracking-widest text-xs font-extralight">UNIRSE</span>
+                                }
+                            </div>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+            }
+        </div>
+    </div>
+</div>
