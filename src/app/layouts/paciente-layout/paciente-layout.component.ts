@@ -5,7 +5,9 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-paciente-layout',
-  imports: [RouterOutlet, HomeNavbarComponent, CommonModule, RouterModule],
+  imports: [RouterOutlet,
+    // HomeNavbarComponent,
+    CommonModule, RouterModule],
   templateUrl: './paciente-layout.component.html',
   styleUrl: './paciente-layout.component.css'
 })
