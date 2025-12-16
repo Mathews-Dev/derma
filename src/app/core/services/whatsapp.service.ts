@@ -16,12 +16,31 @@ export interface RespuestaEnvio {
     error?: string;
 }
 
+export interface ValidacionTurno {
+    success: boolean;
+    validado: boolean;
+    data?: {
+        telefono: string;
+        nombre: string;
+        fecha: Date;
+    };
+    message?: string;
+    error?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class WhatsappService {
     private http = inject(HttpClient);
-    private apiUrl = 'https://tasty-bonobo-unju-d6953079.koyeb.app/api/send-whatsapp';
+    private baseUrl = 'https://tasty-bonobo-unju-d6953079.koyeb.app/api';
+    // private baseUrl = 'http://localhost:3000/api';
+    private apiUrl = `${this.baseUrl}/send-whatsapp`;
+
+    // 🆕 NUEVO MÉTODO: Obtener validación por código de turno
+    obtenerValidacion(codigoTurno: string): Observable<ValidacionTurno> {
+        return this.http.get<ValidacionTurno>(`${this.baseUrl}/validacion/${codigoTurno}`);
+    }
 
     enviarConfirmacionTurno(turno: TurnoData): Observable<RespuestaEnvio> {
         const mensaje = this.construirMensajeConfirmacion(turno);

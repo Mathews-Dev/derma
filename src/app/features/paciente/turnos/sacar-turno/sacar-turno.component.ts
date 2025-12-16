@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -11,6 +11,7 @@ import { Turno } from '../../../../core/interfaces/turno.model';
 import { ProfesionalSelectorComponent } from '../profesional-selector/profesional-selector.component';
 import { CalendarioDisponibilidadComponent } from '../calendario-disponibilidad/calendario-disponibilidad.component';
 import { ConfirmacionTurnoComponent } from '../confirmacion-turno/confirmacion-turno.component';
+import { WhatsappService } from '../../../../core/services/whatsapp.service';
 
 @Component({
   selector: 'app-sacar-turno',
@@ -24,10 +25,11 @@ import { ConfirmacionTurnoComponent } from '../confirmacion-turno/confirmacion-t
   templateUrl: './sacar-turno.component.html',
   styleUrl: './sacar-turno.component.css'
 })
-export class SacarTurnoComponent implements OnInit {
+export class SacarTurnoComponent implements OnInit, OnDestroy {
   private turnoService = inject(TurnoService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private whatsappService = inject(WhatsappService);
 
   // Stepper state
   pasoActual = signal<number>(1);
@@ -46,6 +48,12 @@ export class SacarTurnoComponent implements OnInit {
   // Estados
   isSubmitting = signal<boolean>(false);
   turnoCreado = signal<Turno | null>(null);
+
+  // 🆕 Propiedades para polling
+  private pollingInterval: any;
+  private intentosPolling = 0;
+  private maxIntentosPolling = 40; // 40 intentos x 3 seg = 2 minutos
+  estadoValidacion = signal<'esperando' | 'validado' | 'timeout'>('esperando');
 
   ngOnInit(): void {
     // Pre-cargar teléfono del usuario si está disponible
@@ -121,7 +129,7 @@ export class SacarTurnoComponent implements OnInit {
       const duracion = profesional.duracionConsulta || 30;
       const horaFin = this.calcularHoraFin(hora, duracion);
 
-      // Crear turno
+      // 🔥 CREAR TURNO (sin teléfono si eligió WhatsApp)
       const nuevoTurno: Partial<Turno> = {
         pacienteId: usuario.uid,
         profesionalId: profesional.uid,
@@ -131,21 +139,25 @@ export class SacarTurnoComponent implements OnInit {
         motivo: this.motivo() || null,
         notificacionesWhatsApp: this.notificacionesWhatsApp(),
         telefonoNotificaciones: this.notificacionesWhatsApp()
-          ? this.telefonoNotificaciones()
-          : null
+          ? null // Se actualizará con polling
+          : this.telefonoNotificaciones() || null
       };
 
       const turnoId = await this.turnoService.crearTurno(nuevoTurno);
 
-      // Obtener turno creado para mostrar en paso 4
+      // Obtener turno creado
       const turnos = await firstValueFrom(this.turnoService.getTurnosPorPaciente(usuario.uid));
       const turnoCompleto = turnos?.find(t => t.id === turnoId);
 
       if (turnoCompleto) {
         this.turnoCreado.set(turnoCompleto);
-      }
+        this.siguientePaso(); // Ir a paso 4 (éxito)
 
-      this.siguientePaso(); // Ir a paso 4 (éxito)
+        // 🔥 SI HABILITÓ WHATSAPP: Iniciar polling
+        if (this.notificacionesWhatsApp()) {
+          this.iniciarPollingValidacion(turnoId);
+        }
+      }
     } catch (error) {
       console.error('Error al crear turno:', error);
       alert('Hubo un error al crear el turno. Por favor intenta nuevamente.');
@@ -154,6 +166,71 @@ export class SacarTurnoComponent implements OnInit {
     }
   }
 
+  // 🆕 POLLING: Consultar cada 3 segundos si llegó el número
+  private iniciarPollingValidacion(turnoId: string): void {
+    console.log('🔄 Iniciando polling de validación para turno:', turnoId);
+    this.estadoValidacion.set('esperando');
+
+    this.pollingInterval = setInterval(() => {
+      this.intentosPolling++;
+
+      console.log(`📡 Intento ${this.intentosPolling}/${this.maxIntentosPolling}`);
+
+      this.whatsappService.obtenerValidacion(turnoId).subscribe({
+        next: async (response) => {
+          if (response.validado && response.data) {
+            console.log('✅ Validación recibida:', response.data.telefono);
+
+            // ACTUALIZAR TURNO EN FIREBASE
+            await this.turnoService.actualizarTurno(turnoId, {
+              telefonoNotificaciones: response.data.telefono
+            });
+
+            // Actualizar turno local
+            const turnoActual = this.turnoCreado();
+            if (turnoActual) {
+              this.turnoCreado.set({
+                ...turnoActual,
+                telefonoNotificaciones: response.data.telefono
+              });
+            }
+
+            this.estadoValidacion.set('validado');
+            this.detenerPolling();
+
+            alert(`✅ ¡Teléfono validado exitosamente!\n${response.data.telefono}`);
+          }
+        },
+        error: (err) => {
+          // Si es 404, simplemente sigue esperando
+          if (err.status !== 404) {
+            console.error('Error en polling:', err);
+          }
+        }
+      });
+
+      // Timeout después de 2 minutos
+      if (this.intentosPolling >= this.maxIntentosPolling) {
+        console.log('⏱️ Timeout de validación alcanzado');
+        this.estadoValidacion.set('timeout');
+        this.detenerPolling();
+      }
+    }, 3000); // Cada 3 segundos
+  }
+
+  private detenerPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+      this.intentosPolling = 0;
+      console.log('🛑 Polling detenido');
+    }
+  }
+
+  // IMPORTANTE: Limpiar polling al destruir componente
+  ngOnDestroy(): void {
+    this.detenerPolling();
+  }
   // ==================== HELPERS ====================
 
   private calcularHoraFin(horaInicio: string, duracion: number): string {

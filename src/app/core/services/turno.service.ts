@@ -111,6 +111,9 @@ export class TurnoService {
         });
     }
 
+    async actualizarTurno(turnoId: string, datos: Partial<Turno>): Promise<void> {
+        return this.firestoreService.updateDocument('turnos', turnoId, datos);
+    }
     // ==================== REPROGRAMACIÓN ====================
 
     /**
