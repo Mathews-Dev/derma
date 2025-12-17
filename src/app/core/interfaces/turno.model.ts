@@ -19,7 +19,7 @@ export interface Turno {
     estado: EstadoTurno;
     motivo?: string | null; // Razón de la consulta
     notasPaciente?: string | null;
-    notasProfesional?: string | null;
+    notasProfesional?: string | null | undefined;
     fechaCreacion: Date | any; // Firestore Timestamp
     fechaModificacion?: Date | any | null; // Firestore Timestamp
 

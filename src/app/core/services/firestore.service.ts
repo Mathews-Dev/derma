@@ -9,6 +9,10 @@ export class FirestoreService {
   private firestore: Firestore = inject(Firestore);
 
   // METODOS GENERICOS
+  createId(): string {
+    return doc(collection(this.firestore, '_')).id;
+  }
+
   getCollection<T>(path: string): Observable<T[]> {
     const collectionRef = collection(this.firestore, path);
     return collectionData(collectionRef, { idField: 'id' }) as Observable<T[]>;

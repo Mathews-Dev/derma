@@ -1,0 +1,162 @@
+<!-- Embedded Step View -->
+<div class="w-full mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h3 class="text-2xl font-light text-black tracking-tight mb-2">
+            Programar Primera Sesión
+        </h3>
+        <p class="text-sm text-gray-500">
+            {{ tratamientoNombre() }}
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- LEFT: Visual Calendar -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400">
+                    Selecciona la Fecha
+                </h4>
+                <div class="flex items-center gap-2">
+                    <button (click)="cambiarMes(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <span class="text-sm font-medium min-w-[140px] text-center">
+                        {{ mesActual() | date:'MMMM yyyy' }}
+                    </span>
+                    <button (click)="cambiarMes(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="grid grid-cols-7 gap-1">
+                <!-- Day Headers -->
+                @for (dia of ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; track dia) {
+                <div class="text-center text-[10px] font-bold text-gray-400 uppercase py-2">
+                    {{ dia }}
+                </div>
+                }
+
+                <!-- Calendar Days -->
+                @for (fecha of diasCalendario(); track fecha) {
+                <button type="button" (click)="seleccionarFecha(fecha)" [disabled]="esFechaPasada(fecha)"
+                    [class.opacity-30]="!esMesActual(fecha)" [class.bg-black]="esMismoDia(fecha, fechaSeleccionada())"
+                    [class.text-white]="esMismoDia(fecha, fechaSeleccionada())"
+                    [class.hover:bg-gray-100]="!esMismoDia(fecha, fechaSeleccionada()) && !esFechaPasada(fecha)"
+                    [class.cursor-not-allowed]="esFechaPasada(fecha)"
+                    class="aspect-square flex items-center justify-center text-sm rounded-lg transition-colors disabled:opacity-20 disabled:cursor-not-allowed">
+                    {{ fecha.getDate() }}
+                </button>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: Time Selection -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">
+                Selecciona el Horario
+            </h4>
+
+            @if (fechaSeleccionada()) {
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <p class="text-xs text-blue-900 font-medium">
+                    📅 {{ fechaSeleccionada() | date:'fullDate' }}
+                </p>
+            </div>
+
+            <!-- Morning/Afternoon Tabs -->
+            <div class="flex gap-2 mb-4">
+                <button type="button" (click)="turnoVista.set('manana')" [class.bg-black]="turnoVista() === 'manana'"
+                    [class.text-white]="turnoVista() === 'manana'" [class.bg-gray-100]="turnoVista() !== 'manana'"
+                    class="flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+                    Mañana
+                </button>
+                <button type="button" (click)="turnoVista.set('tarde')" [class.bg-black]="turnoVista() === 'tarde'"
+                    [class.text-white]="turnoVista() === 'tarde'" [class.bg-gray-100]="turnoVista() !== 'tarde'"
+                    class="flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+                    Tarde
+                </button>
+            </div>
+
+            <!-- Time Slots Grid -->
+            <div class="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto pr-2">
+                @for (hora of horariosActuales(); track hora) {
+                <button type="button" (click)="horaSeleccionada.set(hora)"
+                    [class.bg-black]="horaSeleccionada() === hora" [class.text-white]="horaSeleccionada() === hora"
+                    [class.bg-gray-50]="horaSeleccionada() !== hora"
+                    [class.hover:bg-gray-100]="horaSeleccionada() !== hora"
+                    class="px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200">
+                    {{ hora }}
+                </button>
+                }
+            </div>
+
+            <!-- Custom Time Input -->
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                @if (!mostrarHorarioPersonalizado()) {
+                <button type="button" (click)="mostrarHorarioPersonalizado.set(true)"
+                    class="w-full py-2 text-xs font-medium text-gray-600 hover:text-black transition-colors">
+                    + Agregar horario personalizado
+                </button>
+                } @else {
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-gray-600">Horario personalizado (HH:mm)</label>
+                    <div class="flex gap-2">
+                        <input type="time" [ngModel]="horarioPersonalizado()"
+                            (ngModelChange)="horarioPersonalizado.set($event)"
+                            class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                        <button type="button" (click)="usarHorarioPersonalizado()" [disabled]="!horarioPersonalizado()"
+                            class="px-4 py-2 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Usar
+                        </button>
+                        <button type="button"
+                            (click)="mostrarHorarioPersonalizado.set(false); horarioPersonalizado.set('')"
+                            class="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-xs">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="flex items-center justify-center h-[200px] text-gray-400 text-sm">
+                Primero selecciona una fecha
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+    <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+        <p class="text-sm text-red-700">{{ errorMessage() }}</p>
+    </div>
+    }
+
+    <!-- Actions -->
+    <div class="flex items-center gap-4 mt-8">
+        <button (click)="onCancelar()" [disabled]="isSubmitting()"
+            class="flex-1 px-6 py-4 bg-white border border-gray-200 text-gray-900 text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50">
+            Volver a Consulta
+        </button>
+
+        <button (click)="confirmarSesion()" [disabled]="!fechaSeleccionada() || !horaSeleccionada() || isSubmitting()"
+            class="flex-1 px-6 py-4 bg-black text-white text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            @if (isSubmitting()) {
+            <div class="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Programando...</span>
+            } @else {
+            <span>Confirmar y Finalizar</span>
+            }
+        </button>
+    </div>
+
+</div>

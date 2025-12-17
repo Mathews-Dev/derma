@@ -55,10 +55,11 @@ export interface Consentimiento {
     fechaFirma: Date;
     archivoUrl: string; // Foto del documento físico firmado
     tipoTratamiento?: string;
+    pacienteId?: string; // Optional for now to avoid breaking other usages, or string if mandatory
 }
 
 export interface PerfilEstetico {
-    biotipo: BiotipoCutaneo;
+    biotipo: TipoPiel;
     fototipo: Fototipo;
     tipoSangre?: 'O+' | 'O-' | 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-'; // Requerido para PRP/Cirugías
     preocupaciones: string[]; // Manchas, Arrugas, Acné, etc.

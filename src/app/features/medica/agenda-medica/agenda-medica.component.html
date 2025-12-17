@@ -17,6 +17,18 @@
                     Gestiona tus turnos y consultas
                 </p>
             </div>
+
+            <!-- Legend -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="text-xs font-medium text-gray-600">Consultas</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-xs font-medium text-gray-600">Sesiones de Tratamiento</span>
+                </div>
+            </div>
         </div>
 
         <!-- TABLA CARD CONTAINER -->
@@ -106,7 +118,7 @@
                     </div>
                 </div>
 
-                <!-- Motivo -->
+                <!-- Motivo / Tratamiento -->
                 <div class="flex items-start gap-4">
                     <div class="p-2 bg-gray-50 rounded-lg text-gray-400">
                         <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -116,13 +128,28 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">Motivo de
-                            consulta</p>
+                        <p class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
+                            {{ selectedEvent().title.includes('SESIÓN') ? 'Tratamiento' : 'Motivo de consulta' }}
+                        </p>
                         <p class="text-sm font-medium text-gray-900 leading-relaxed">
                             {{ selectedEvent().motivo }}
                         </p>
                     </div>
                 </div>
+
+                <!-- Session-specific info -->
+                @if (selectedEvent().title.includes('SESIÓN')) {
+                <div class="p-4 bg-green-50 border border-green-200 rounded-xl space-y-2">
+                    <p class="text-xs font-bold text-green-900 uppercase tracking-wider">Información de Sesión</p>
+                    <div class="text-sm text-green-800 space-y-1">
+                        <p><strong>Tipo:</strong> Sesión de Tratamiento</p>
+                        @if (selectedEvent().description.includes('Sesión:')) {
+                        <p><strong>Progreso:</strong> {{
+                            selectedEvent().description.split('Sesión:')[1].split('\n')[0].trim() }}</p>
+                        }
+                    </div>
+                </div>
+                }
 
                 <!-- Contacto -->
                 <div class="flex items-start gap-4">
@@ -146,15 +173,27 @@
         <!-- Footer / Acciones -->
         <div class="p-8 mt-2">
             <div class="flex items-center gap-3">
+                @if (selectedEvent().title.includes('SESIÓN')) {
+                <!-- Session actions -->
+                <button (click)="iniciarSesion()"
+                    class="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-green-600 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/10">
+                    Iniciar Sesión
+                </button>
+                <button (click)="closeModal()"
+                    class="px-6 py-3.5 border border-gray-200 text-gray-600 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all">
+                    Cerrar
+                </button>
+                } @else {
+                <!-- Consultation actions -->
                 <button (click)="iniciarConsulta()"
                     class="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-black transition-all shadow-lg shadow-gray-900/10">
                     Iniciar Consulta
                 </button>
-
-                <button (click)="marcarAusente()"
-                    class="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-white border border-gray-200 text-gray-900 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all">
-                    No Asistió
+                <button (click)="closeModal()"
+                    class="px-6 py-3.5 border border-gray-200 text-gray-600 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all">
+                    Cerrar
                 </button>
+                }
             </div>
         </div>
 

@@ -1,0 +1,77 @@
+<div class="max-w-4xl mx-auto p-6 space-y-8">
+    <!-- Header Sesión -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-start">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Sesión de Tratamiento</h2>
+            <p class="text-gray-500 mt-1">{{ tratamientoNombre }}</p>
+        </div>
+        <div class="text-right">
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                Sesión {{ sesionActual }} / {{ totalSesiones }}
+            </span>
+            <p class="text-xs text-gray-400 mt-2">{{ fechaActual | date:'fullDate' }}</p>
+        </div>
+    </div>
+
+    <!-- Paso 1: Fotografía de Progreso -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                📸
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Registro Fotográfico</h3>
+        </div>
+
+        @if (!fotoSesion()) {
+        <div class="bg-gray-50 rounded-xl p-8 text-center border-2 border-dashed border-gray-200">
+            <p class="text-gray-500 mb-4">Es necesario capturar una foto del progreso antes de finalizar la sesión.</p>
+            <button (click)="mostrarCamara.set(true)" *ngIf="!mostrarCamara()"
+                class="px-6 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors">
+                Abrir Cámara
+            </button>
+
+            @if (mostrarCamara()) {
+            <app-captura-foto (fotoCapturada)="onFotoCapturada($event)"></app-captura-foto>
+            }
+        </div>
+        } @else {
+        <div class="relative rounded-2xl overflow-hidden bg-black aspect-video group">
+            <img [src]="fotoSesion()" class="w-full h-full object-contain">
+            <div
+                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button (click)="fotoSesion.set(''); mostrarCamara.set(false)"
+                    class="px-4 py-2 bg-white text-gray-900 rounded-lg font-bold">
+                    Retomar Foto
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Paso 2: Notas de Evolución -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+                📝
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Notas de Evolución</h3>
+        </div>
+
+        <textarea [(ngModel)]="notasSesion" rows="4"
+            class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none"
+            placeholder="Describe el progreso, reacciones del paciente, parámetros utilizados, etc..."></textarea>
+    </div>
+
+    <!-- Acciones Finales -->
+    <div class="flex justify-end gap-4 pt-4">
+        <button (click)="cancelarSesion.emit()"
+            class="px-6 py-3 text-gray-500 font-medium hover:bg-gray-50 rounded-xl transition-colors">
+            Cancelar
+        </button>
+        <button (click)="finalizarSesion()" [disabled]="!esValido()"
+            class="px-8 py-3 bg-black text-white font-bold rounded-xl shadow-lg shadow-black/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Finalizar Sesión
+        </button>
+    </div>
+</div>

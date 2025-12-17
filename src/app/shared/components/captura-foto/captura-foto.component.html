@@ -1,0 +1,35 @@
+<div class="space-y-4">
+    <!-- Camera View -->
+    <div class="relative overflow-hidden rounded-2xl bg-black aspect-video shadow-lg">
+        <video #video autoplay playsinline class="w-full h-full object-cover"></video>
+        <canvas #canvas hidden></canvas>
+
+        <!-- Loading / Estado -->
+        @if (error) {
+        <div class="absolute inset-0 flex items-center justify-center bg-black/80 text-white p-4 text-center">
+            <p>{{ error }}</p>
+        </div>
+        }
+    </div>
+
+    <!-- Controls -->
+    <div class="flex justify-center gap-4">
+        @if (!stream) {
+        <button (click)="iniciarCamara()"
+            class="px-6 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all flex items-center gap-2">
+            📷 Activar Cámara
+        </button>
+        } @else {
+        <button (click)="tomarFoto()"
+            class="px-8 py-3 bg-black text-white rounded-full text-sm font-bold tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 flex items-center gap-2">
+            <span class="size-3 rounded-full bg-red-500 animate-pulse"></span>
+            CAPTURAR
+        </button>
+
+        <button (click)="detenerCamara()"
+            class="px-4 py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all">
+            Cancelar
+        </button>
+        }
+    </div>
+</div>

@@ -148,6 +148,16 @@ ng g c features/recepcion/gestion-turnos --skip-tests
 ng g c features/operaciones/gestion-insumos --skip-tests
 ng g c features/operaciones/gestion-tareas --skip-tests
 
+# Módulo Fotografía y Consentimiento
+ng generate component shared/components/captura-foto --standalone --skip-tests
+ng generate component shared/components/visor-fotos --standalone --skip-tests
+ng generate component features/medica/consentimiento-form --standalone --skip-tests
+ng generate component features/medica/sesion-tratamiento --standalone --skip-tests
+
+# Servicios Fotografía y Consentimiento
+ng generate service core/services/foto-progreso --skip-tests
+ng generate service core/services/consentimiento --skip-tests
+
 # Instalacion y configuración de Tailwind
 npm install tailwindcss @tailwindcss/postcss postcss --force
 

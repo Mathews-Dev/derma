@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, effect, HostListener } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { CalendarComponent } from "@schedule-x/angular";
 import { createCalendar, createViewDay, createViewWeek, createViewMonthGrid, createViewMonthAgenda, CalendarApp } from "@schedule-x/calendar";
 // import { createEventModalPlugin } from '@schedule-x/event-modal'; // Removed default modal
@@ -28,6 +29,7 @@ export class AgendaMedicaComponent implements OnInit {
   private firestoreService = inject(FirestoreService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   calendarControls = createCalendarControlsPlugin();
   private isMobile = window.innerWidth < 768;
@@ -64,6 +66,14 @@ export class AgendaMedicaComponent implements OnInit {
     this.router.navigate(['/medica/consulta', event.id]);
   }
 
+  iniciarSesion(): void {
+    const event = this.selectedEvent();
+    if (!event) return;
+
+    this.closeModal();
+    this.router.navigate(['/medica/sesion', event.id]);
+  }
+
   marcarAusente() {
     const event = this.selectedEvent();
     if (!event) return;
@@ -84,7 +94,29 @@ export class AgendaMedicaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // La carga se maneja via effect
+    // La carga se maneja via effect, pero verificamos params para acciones post-consulta
+    this.route.queryParams.subscribe(params => {
+      if (params['action'] === 'schedule_session') {
+        const patientId = params['patientId'];
+        const treatmentName = params['treatmentName'];
+        console.log('🗓️ Regreso de consulta. Programar sesión para:', patientId, treatmentName);
+
+        // TODO: Abrir modal de "Nuevo Turno" pre-rellenado (cuando exista el modal de creación)
+        // Por ahora, limpiamos la URL para que no quede "sucia"
+        this.limpiarUrl();
+      }
+    });
+  }
+
+  private limpiarUrl() {
+    this.router.navigate([], {
+      queryParams: {
+        action: null,
+        patientId: null,
+        treatmentName: null
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   cargarTurnos(user: any) {
@@ -114,6 +146,34 @@ export class AgendaMedicaComponent implements OnInit {
           }
         }));
 
+        // 4. For treatment sessions, fetch treatment info
+        const tratamientosMap = new Map<string, any>();
+        const turnosSesion = turnos.filter(t => t.tipo === 'tratamiento');
+
+        await Promise.all(turnosSesion.map(async (turno) => {
+          try {
+            // Extract treatment name from motivo (e.g., "Primera sesión: Rinoplastia")
+            const tratamientoNombre = turno.motivo?.replace('Primera sesión: ', '').trim();
+            if (tratamientoNombre) {
+              // Try to find the TratamientoPaciente using firstValueFrom
+              const tratamientos$ = this.firestoreService.getCollection<any>('tratamientos-pacientes');
+              const allTratamientos = await firstValueFrom(tratamientos$);
+
+              // Filter manually
+              const tratamientos = allTratamientos.filter((t: any) =>
+                t.pacienteId === turno.pacienteId &&
+                t.nombreTratamiento === tratamientoNombre
+              );
+
+              if (tratamientos && tratamientos.length > 0) {
+                tratamientosMap.set(turno.id!, tratamientos[0]);
+              }
+            }
+          } catch (e) {
+            console.error(`Error al cargar tratamiento para turno ${turno.id}`, e);
+          }
+        }));
+
         const events = turnos
           .filter(t => t.estado !== EstadoTurno.CANCELADO)
           .map(t => {
@@ -130,20 +190,52 @@ export class AgendaMedicaComponent implements OnInit {
             const endISO = `${dateStr}T${t.horaFin}`;
             const timeZone = Temporal.Now.timeZoneId();
 
-            const description = `
+            const nombrePaciente = nombresPacientes.get(t.pacienteId) || 'Paciente';
+
+            // Determine event type and styling
+            const esSesion = t.tipo === 'tratamiento';
+            const tipoLabel = esSesion ? 'SESIÓN' : 'CONSULTA';
+            const colorClass = esSesion ? 'treatment-session' : 'consultation';
+
+            // Get treatment info if it's a session
+            const tratamientoInfo = esSesion ? tratamientosMap.get(t.id!) : null;
+            const tratamientoNombre = tratamientoInfo?.nombreTratamiento || t.motivo?.replace('Primera sesión: ', '');
+
+            // Build enhanced title with visible session info
+            let eventTitle = '';
+            if (esSesion && tratamientoInfo) {
+              const sesionActual = tratamientoInfo.sesionesRealizadas + 1;
+              const sesionTotal = tratamientoInfo.sesionesTotales;
+              eventTitle = `${tipoLabel} ${sesionActual}/${sesionTotal} - ${tratamientoNombre} | ${nombrePaciente}`;
+            } else if (esSesion && tratamientoNombre) {
+              eventTitle = `${tipoLabel} - ${tratamientoNombre} | ${nombrePaciente}`;
+            } else {
+              eventTitle = `${tipoLabel} - ${nombrePaciente}`;
+            }
+
+            // Enhanced description for modal
+            let eventDescription = `
 Motivo: ${t.motivo || 'Sin motivo'}
 Estado: ${t.estado.toUpperCase()}
 Contacto: ${t.telefonoNotificaciones || 'No registrado'}
 `.trim();
 
-            const nombrePaciente = nombresPacientes.get(t.pacienteId) || 'Paciente';
+            if (esSesion && tratamientoInfo) {
+              eventDescription += `
+Tratamiento: ${tratamientoInfo.nombreTratamiento}
+Sesión: ${tratamientoInfo.sesionesRealizadas + 1}/${tratamientoInfo.sesionesTotales}
+Progreso: ${tratamientoInfo.progreso}%
+Profesional: ${tratamientoInfo.profesionalNombre}
+`.trim();
+            }
 
             return {
               id: t.id!,
-              title: `${nombrePaciente} (${t.estado})`,
+              title: eventTitle,
               start: Temporal.PlainDateTime.from(startISO).toZonedDateTime(timeZone),
               end: Temporal.PlainDateTime.from(endISO).toZonedDateTime(timeZone),
-              description: description,
+              description: eventDescription,
+              calendarId: colorClass, // Used for styling
               // Extra fields for Modal
               estado: t.estado,
               pacienteId: t.pacienteId,
@@ -185,6 +277,34 @@ Contacto: ${t.telefonoNotificaciones || 'No registrado'}
         ],
         events: events,
         selectedDate: Temporal.Now.plainDateISO(),
+        calendars: {
+          consultation: {
+            colorName: 'consultation',
+            lightColors: {
+              main: '#3b82f6',      // Blue for consultations
+              container: '#dbeafe',
+              onContainer: '#1e40af',
+            },
+            darkColors: {
+              main: '#60a5fa',
+              onContainer: '#e0f2fe',
+              container: '#1e3a8a',
+            },
+          },
+          'treatment-session': {
+            colorName: 'treatment',
+            lightColors: {
+              main: '#10b981',      // Green for treatment sessions
+              container: '#d1fae5',
+              onContainer: '#065f46',
+            },
+            darkColors: {
+              main: '#34d399',
+              onContainer: '#d1fae5',
+              container: '#064e3b',
+            },
+          },
+        },
         dayBoundaries: {
           start: '08:00',
           end: '20:00',

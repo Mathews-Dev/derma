@@ -12,7 +12,7 @@
             </button>
             <div class="flex items-center gap-3">
                 <div class="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    Consulta en Curso
+                    {{ turno()?.tipo === 'tratamiento' ? 'Sesión de Tratamiento' : 'Consulta en Curso' }}
                 </div>
             </div>
         </div>
@@ -26,7 +26,19 @@
         </div>
     </div>
     } @else {
-    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- CONDITIONAL VIEW: Show either Consultation OR Scheduling Step -->
+    @if (showSchedulingModal() && schedulingData()) {
+    <!-- SCHEDULING STEP VIEW -->
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <app-programar-sesion [profesionalId]="schedulingData()!.profesionalId"
+            [pacienteId]="schedulingData()!.pacienteId" [tratamientoNombre]="schedulingData()!.tratamientoNombre"
+            (sesionProgramada)="onSesionProgramada($event)" (cancelar)="onCancelarProgramacion()">
+        </app-programar-sesion>
+    </div>
+    } @else {
+    <!-- CONSULTATION VIEW -->
+    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
 
         <!-- COLUMNA IZQUIERDA: RESUMEN PACIENTE (4 cols) -->
         <div class="lg:col-span-4 space-y-6">
@@ -49,42 +61,199 @@
                     <div class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
                         <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Motivo Turno</p>
                         <p class="text-sm text-gray-900 font-medium leading-relaxed">{{ turno()?.motivo || 'No
-                            especificado' }}</p>
+                            specificado' }}</p>
                     </div>
 
-                    <!-- Datos Rápidos (Con botones de edición si faltan) -->
+                    <!-- Datos Rápidos (Editables) -->
                     <div class="grid grid-cols-2 gap-3">
-                        <div
-                            class="p-3 bg-white rounded-xl border border-gray-100 group cursor-pointer hover:border-gray-300 transition-colors">
-                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Edad</p>
+                        <!-- EDAD -->
+                        <div class="p-3 bg-white rounded-xl border border-gray-100 group transition-colors relative">
+                            <p
+                                class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1 flex justify-between">
+                                Edad
+                                <button (click)="toggleEditEdad()" class="text-gray-300 hover:text-black">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="w-3 h-3">
+                                        <path
+                                            d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                    </svg>
+                                </button>
+                            </p>
+
+                            @if (editingEdad()) {
+                            <div class="flex items-center gap-1">
+                                <input type="number" [(ngModel)]="newEdad"
+                                    class="w-full text-sm border-b border-black focus:outline-none p-1"
+                                    (keyup.enter)="saveEdad()">
+                                <button (click)="saveEdad()" class="text-green-500 text-xs">OK</button>
+                            </div>
+                            } @else {
                             @if (paciente()?.edad) {
                             <p class="text-sm font-medium">{{ paciente()?.edad }} Años</p>
                             } @else {
-                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1">
+                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1 cursor-pointer"
+                                (click)="toggleEditEdad()">
                                 --
-                                <svg class="size-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path
-                                        d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                                </svg>
                             </p>
                             }
+                            }
                         </div>
-                        <div
-                            class="p-3 bg-white rounded-xl border border-gray-100 group cursor-pointer hover:border-gray-300 transition-colors">
-                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Tipo Piel</p>
+
+                        <!-- TIPO PIEL -->
+                        <div class="p-3 bg-white rounded-xl border border-gray-100 group transition-colors relative">
+                            <p
+                                class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1 flex justify-between">
+                                Tipo Piel
+                                <button (click)="toggleEditPiel()" class="text-gray-300 hover:text-black">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="w-3 h-3">
+                                        <path
+                                            d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                    </svg>
+                                </button>
+                            </p>
+
+                            @if (editingPiel()) {
+                            <div class="flex items-center gap-1">
+                                <select [(ngModel)]="newPiel"
+                                    class="w-full text-sm border-b border-black focus:outline-none p-1 bg-white"
+                                    (change)="savePiel()">
+                                    <option [ngValue]="null" disabled>Seleccionar</option>
+                                    @for (tipo of tipoPielOptions; track tipo) {
+                                    <option [ngValue]="tipo">{{ tipo | titlecase }}</option>
+                                    }
+                                </select>
+                                <button (click)="savePiel()" class="text-green-500 text-xs">OK</button>
+                            </div>
+                            } @else {
                             @if (paciente()?.perfilEstetico?.biotipo) {
                             <p class="text-sm font-medium capitalize">{{ paciente()?.perfilEstetico?.biotipo }}</p>
                             } @else {
-                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1">
+                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1 cursor-pointer"
+                                (click)="toggleEditPiel()">
                                 Definir
-                                <svg class="size-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path
-                                        d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                                </svg>
                             </p>
                             }
+                            }
+                        </div>
+
+                        <!-- DNI (Nuevo) -->
+                        <div class="p-3 bg-white rounded-xl border border-gray-100 group transition-colors relative">
+                            <p
+                                class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1 flex justify-between">
+                                DNI / Doc
+                                <button (click)="toggleEditDni()" class="text-gray-300 hover:text-black">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="w-3 h-3">
+                                        <path
+                                            d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                    </svg>
+                                </button>
+                            </p>
+                            @if (editingDni()) {
+                            <div class="flex items-center gap-1">
+                                <input type="text" [(ngModel)]="newDni"
+                                    class="w-full text-sm border-b border-black focus:outline-none p-1"
+                                    (keyup.enter)="saveDni()">
+                                <button (click)="saveDni()" class="text-green-500 text-xs">OK</button>
+                            </div>
+                            } @else {
+                            <p class="text-sm font-medium">{{ paciente()?.dni || '---' }}</p>
+                            }
+                        </div>
+                        <!-- CICATRIZACION (Nuevo) -->
+                        <div class="p-3 bg-white rounded-xl border border-gray-100 group transition-colors relative">
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Cicatrización
+                            </p>
+                            <select [(ngModel)]="cicatrizacion" (change)="updateCicatrizacion(cicatrizacion())"
+                                class="w-full text-sm font-medium bg-transparent focus:outline-none cursor-pointer">
+                                <option value="normal">Normal</option>
+                                <option value="queloide">Queloide ⚠️</option>
+                                <option value="atrofica">Atrófica</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ficha Médica Expandida -->
+                    <div class="space-y-4 pt-4 border-t border-gray-100">
+                        <!-- Alergias -->
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Alergias</p>
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                @for (alergia of alergias(); track $index) {
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-700 text-xs font-medium border border-red-100">
+                                    {{ alergia.nombre }}
+                                    <button (click)="removeAlergia($index)" class="hover:text-red-900">×</button>
+                                </span>
+                                }
+                            </div>
+                            <div class="flex gap-1">
+                                <input [(ngModel)]="tempAlergiaNombre" placeholder="Nueva Alergia..."
+                                    class="text-xs border-b border-gray-300 focus:border-black focus:outline-none w-full py-1 bg-transparent"
+                                    (keyup.enter)="addAlergia()">
+                                <button (click)="addAlergia()" class="text-black text-xs font-bold">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Medicamentos -->
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Medicamentos
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                @for (med of medicamentos(); track $index) {
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
+                                    {{ med }}
+                                    <button (click)="removeMedicamento($index)" class="hover:text-blue-900">×</button>
+                                </span>
+                                }
+                            </div>
+                            <div class="flex gap-1">
+                                <input [(ngModel)]="tempMedicamento" placeholder="Medicamento..."
+                                    class="text-xs border-b border-gray-300 focus:border-black focus:outline-none w-full py-1 bg-transparent"
+                                    (keyup.enter)="addMedicamento()">
+                                <button (click)="addMedicamento()" class="text-black text-xs font-bold">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Antecedentes -->
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Antecedentes
+                                Estéticos</p>
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                @for (ant of antecedentes(); track $index) {
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium border border-purple-100">
+                                    {{ ant }}
+                                    <button (click)="removeAntecedente($index)" class="hover:text-purple-900">×</button>
+                                </span>
+                                }
+                            </div>
+                            <div class="flex gap-1">
+                                <input [(ngModel)]="tempAntecedente" placeholder="Ej. Botox, Rellenos..."
+                                    class="text-xs border-b border-gray-300 focus:border-black focus:outline-none w-full py-1 bg-transparent"
+                                    (keyup.enter)="addAntecedente()">
+                                <button (click)="addAntecedente()" class="text-black text-xs font-bold">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Tipo Sangre (Para Cirugías) -->
+                        <div class="pt-2">
+                            <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Tipo de
+                                Sangre</p>
+                            <select [(ngModel)]="tipoSangre" (change)="saveTipoSangre()"
+                                class="w-full text-xs font-medium bg-gray-50 border border-gray-200 rounded p-1 focus:outline-none">
+                                <option value="">Seleccionar</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -101,7 +270,7 @@
                     Notas de Consulta (Diagnóstico)
                 </h3>
 
-                <textarea
+                <textarea [(ngModel)]="notasMedicas"
                     class="w-full min-h-[150px] p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all resize-none placeholder-gray-400"
                     placeholder="Escribe aquí las observaciones clínicas, síntomas y evolución..."></textarea>
             </div>
@@ -132,10 +301,13 @@
                         </h4>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                             @for (t of tratamientosQuirurgicos(); track t.id) {
-                            <button
+                            <button (click)="selectTratamiento(t)"
                                 class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-red-500/50 hover:bg-white/10 transition-all">
                                 <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
-                                <p class="text-[10px] text-gray-400 mt-1">Requiere Consentimiento</p>
+                                <p class="text-[10px] text-gray-400 mt-1">
+                                    {{ t.duracion | durationFormat }} · {{ t.precio | currency }} <br>
+                                    <span class="text-red-300">Requiere Consentimiento</span>
+                                </p>
                             </button>
                             }
                         </div>
@@ -148,11 +320,12 @@
                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Facial</h4>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                             @for (t of tratamientosFaciales(); track t.id) {
-                            <button
+                            <button (click)="selectTratamiento(t)"
                                 class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all">
                                 <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
-                                <p class="text-[10px] text-gray-400 mt-1">{{ t.duracion }} min · {{ t.precio | currency
-                                    }}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">
+                                    {{ t.duracion | durationFormat }} · {{ t.precio | currency }}
+                                </p>
                             </button>
                             }
                         </div>
@@ -165,9 +338,31 @@
                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Corporal</h4>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                             @for (t of tratamientosCorporales(); track t.id) {
-                            <button
+                            <button (click)="selectTratamiento(t)"
                                 class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all">
                                 <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">
+                                    {{ t.duracion | durationFormat }} · {{ t.precio | currency }}
+                                </p>
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- OTROS (Catch-all) -->
+                    @if (tratamientosOtros().length > 0) {
+                    <div>
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Otros
+                            Tratamientos</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @for (t of tratamientosOtros(); track t.id) {
+                            <button (click)="selectTratamiento(t)"
+                                class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all">
+                                <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
+                                <p class="text-[10px] text-gray-400 mt-1 capitalize">
+                                    {{ t.categoria }} · {{ t.duracion | durationFormat }} · {{ t.precio | currency }}
+                                </p>
                             </button>
                             }
                         </div>
@@ -181,5 +376,44 @@
 
         </div>
     </div>
+
+    <!-- CONSENT MODAL (Simple Overlay) -->
+    @if (showConsentModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 class="text-lg font-bold text-black mb-2">Consentimiento Requerido</h3>
+            <p class="text-sm text-gray-600 mb-6">
+                Para el tratamiento <strong>{{ selectedTratamiento()?.nombre }}</strong>, es necesario adjuntar el
+                consentimiento informado firmado.
+            </p>
+
+            <div class="space-y-4">
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer transition-colors">
+                    <svg class="h-8 w-8 text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span class="text-sm text-gray-500">Subir foto del documento</span>
+                    <input type="file" class="hidden">
+                </div>
+
+                <!-- Mock Action Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button (click)="showConsentModal.set(false)"
+                        class="w-full py-3 rounded-xl border border-gray-200 text-sm font-medium hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button (click)="confirmarTratamiento(selectedTratamiento()!)"
+                        class="w-full py-3 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800">
+                        Confirmar y Continuar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    }
     }
 </div>

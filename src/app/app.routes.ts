@@ -158,6 +158,10 @@ export const routes: Routes = [
             {
                 path: 'consulta/:turnoId',
                 loadComponent: () => import('./features/medica/consulta-activa/consulta-activa.component').then(m => m.ConsultaActivaComponent)
+            },
+            {
+                path: 'sesion/:turnoId',
+                loadComponent: () => import('./features/medica/sesion-tratamiento/sesion-tratamiento.component').then(m => m.SesionTratamientoComponent)
             }
         ]
     },
