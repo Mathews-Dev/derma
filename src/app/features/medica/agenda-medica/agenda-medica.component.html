@@ -1,0 +1,16 @@
+<div class="p-6">
+    <div class="mb-6">
+        <h2 class="text-2xl font-light text-black">Mi Agenda</h2>
+        <p class="text-gray-500 text-sm">Gestiona tus turnos y consultas.</p>
+    </div>
+
+    @if (calendarApp()) {
+    <div class="ng-calendar-wrapper bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <sx-calendar [calendarApp]="calendarApp()!"></sx-calendar>
+    </div>
+    } @else {
+    <div class="flex items-center justify-center h-96">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+    </div>
+    }
+</div>

@@ -1,114 +1,181 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
     <!-- CALENDARIO -->
-    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+    <div class="bg-white rounded-none md:rounded-3xl p-0 md:p-8 md:border md:border-gray-100">
         <!-- Header Mes -->
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-base font-medium text-gray-900 capitalize">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-2xl font-light text-black capitalize tracking-tight">
                 {{ mesActual() | date:'MMMM yyyy':'':'es' }}
             </h3>
-            <div class="flex gap-1">
+            <div class="flex gap-2">
                 <button type="button" (click)="cambiarMes(-1)"
-                    class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                    class="size-10 flex items-center justify-center rounded-full hover:bg-black hover:text-white text-black transition-all duration-300 border border-gray-100 hover:border-black">
                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
                 <button type="button" (click)="cambiarMes(1)"
-                    class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                    class="size-10 flex items-center justify-center rounded-full hover:bg-black hover:text-white text-black transition-all duration-300 border border-gray-100 hover:border-black">
                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
             </div>
         </div>
 
         <!-- Días Semana -->
-        <div class="grid grid-cols-7 mb-2">
+        <div class="grid grid-cols-7 mb-4">
             @for (dia of ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']; track dia) {
-            <div class="text-xs font-medium text-gray-400 text-center py-2">
+            <div class="text-[10px] uppercase tracking-widest font-bold text-gray-400 text-center py-2">
                 {{ dia }}
             </div>
             }
         </div>
 
         <!-- Grid Días -->
-        <div class="grid grid-cols-7 gap-1">
+        <div class="grid grid-cols-7 gap-1 md:gap-2">
             @for (fecha of diasCalendario(); track fecha.toISOString()) {
             <button type="button" [disabled]="esFechaPasada(fecha) || !esDiaLaboral(fecha)"
                 (click)="seleccionarFecha(fecha)" [ngClass]="{
-                        'bg-black text-white hover:bg-gray-800 shadow-md transform scale-105': esMismoDia(fecha, fechaSeleccionada()),
-                        'bg-white text-gray-900 border border-gray-200 hover:border-black hover:shadow-sm': !esMismoDia(fecha, fechaSeleccionada()) && !esFechaPasada(fecha) && esDiaLaboral(fecha),
-                        'text-gray-300 cursor-not-allowed bg-transparent border border-transparent': esFechaPasada(fecha) || !esDiaLaboral(fecha),
+                        'bg-black text-white shadow-lg shadow-black/20': esMismoDia(fecha, fechaSeleccionada()),
+                        'bg-white text-gray-900 hover:bg-gray-50': !esMismoDia(fecha, fechaSeleccionada()) && !esFechaPasada(fecha) && esDiaLaboral(fecha),
+                        'text-gray-300 cursor-not-allowed bg-transparent': esFechaPasada(fecha) || !esDiaLaboral(fecha),
                         'opacity-0 pointer-events-none': fecha.getMonth() !== mesActual().getMonth()
                     }"
-                class="h-9 w-full rounded-lg text-sm font-medium transition-all flex items-center justify-center relative">
-                {{ fecha.getDate() }}
+                class="aspect-square rounded-full flex flex-col items-center justify-center text-sm font-light transition-all duration-300 relative group">
+                <span [class.font-normal]="esMismoDia(fecha, fechaSeleccionada())">{{ fecha.getDate() }}</span>
 
-                @if (esMismoDia(fecha, fechaSeleccionada())) {
-                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-emerald-500"></div>
+                <!-- Dot Indicator for available days -->
+                @if (!esMismoDia(fecha, fechaSeleccionada()) && !esFechaPasada(fecha) && esDiaLaboral(fecha)) {
+                <div
+                    class="absolute bottom-1.5 size-1 rounded-full bg-black opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
                 }
             </button>
             }
         </div>
 
-        <div class="mt-4 flex items-center justify-center gap-6 text-xs text-gray-500">
+        <!-- Leyenda Minimalista -->
+        <div class="mt-8 flex items-center justify-center gap-8 text-[10px] uppercase tracking-widest text-gray-500">
             <div class="flex items-center gap-2">
                 <div class="size-2 rounded-full bg-black"></div>
-                <span class="font-medium text-gray-700">Seleccionado</span>
+                <span>Seleccionado</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="size-2 rounded-full bg-gray-200"></div>
-                <span class="font-medium text-gray-700">Disponible</span>
+                <div class="size-2 rounded-full border border-gray-300"></div>
+                <span>Disponible</span>
             </div>
         </div>
     </div>
 
     <!-- HORARIOS -->
-    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col">
-        <h3 class="text-base font-medium text-gray-900 mb-2">Horarios Disponibles</h3>
+    <div class="flex flex-col">
+        <div class="bg-white rounded-none md:rounded-3xl md:border md:border-gray-100 p-0 md:p-8 flex-1">
+            <h3 class="text-2xl font-light text-black mb-1 tracking-tight">Horarios</h3>
+            <p class="text-sm text-gray-500 font-light mb-8">Selecciona tu hora preferida</p>
 
-        @if (fechaSeleccionada()) {
-        <p class="text-sm text-gray-600 mb-6">
-            Para el {{ fechaSeleccionada() | date:'EEEE d \'de\' MMMM':'':'es' }}
-        </p>
+            @if (fechaSeleccionada()) {
+            <div class="mb-6 pb-6 border-b border-gray-100">
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-900">
+                    {{ fechaSeleccionada() | date:'EEEE d \'de\' MMMM':'':'es' }}
+                </p>
+            </div>
 
-        @if (isLoadingSlots()) {
-        <div class="flex-1 flex items-center justify-center">
-            <div class="animate-spin rounded-full size-8 border-2 border-gray-200 border-t-black"></div>
-        </div>
-        } @else if (slotsDelDia().length > 0) {
-        <div class="grid grid-cols-3 gap-3">
-            @for (slot of slotsDelDia(); track slot.hora) {
-            <button type="button" [disabled]="!slot.disponible" (click)="seleccionarHora(slot.hora)" [ngClass]="{
-                                'bg-black text-white shadow-md': horaSeleccionada() === slot.hora,
-                                'bg-white text-gray-900 border border-gray-200 hover:border-black': slot.disponible && horaSeleccionada() !== slot.hora,
-                                'bg-gray-100 text-gray-400 border border-transparent cursor-not-allowed': !slot.disponible
-                            }" class="py-2.5 px-2 rounded-lg text-sm font-medium transition-all text-center">
-                {{ slot.hora }}
-            </button>
+            @if (isLoadingSlots()) {
+            <div class="flex-1 flex items-center justify-center py-12">
+                <div class="animate-spin rounded-full size-6 border-2 border-gray-100 border-t-black"></div>
+            </div>
+            } @else if (slotsDelDia().length > 0) {
+            <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                <!-- TABS -->
+                <div class="flex p-1 bg-gray-50 rounded-xl">
+                    <button type="button" (click)="turnoVista.set('manana')"
+                        class="flex-1 py-1.5 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                        [ngClass]="{
+                            'bg-white text-black shadow-sm': turnoVista() === 'manana',
+                            'text-gray-400 hover:text-gray-600': turnoVista() !== 'manana'
+                        }">
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Mañana
+                    </button>
+                    <button type="button" (click)="turnoVista.set('tarde')"
+                        class="flex-1 py-1.5 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                        [ngClass]="{
+                            'bg-white text-black shadow-sm': turnoVista() === 'tarde',
+                            'text-gray-400 hover:text-gray-600': turnoVista() !== 'tarde'
+                        }">
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        Tarde
+                    </button>
+                </div>
+
+                <!-- CONTENIDO TABS -->
+                <div class="min-h-[200px]">
+                    @if (turnoVista() === 'manana') {
+                    @if (slotsManana().length > 0) {
+                    <div class="grid grid-cols-3 gap-3 animate-in fade-in zoom-in-95 duration-300">
+                        @for (slot of slotsManana(); track slot.hora) {
+                        <button type="button" [disabled]="!slot.disponible" (click)="seleccionarHora(slot.hora)"
+                            [ngClass]="{
+                                                'bg-black text-white shadow-lg shadow-black/20 scale-105': horaSeleccionada() === slot.hora,
+                                                'bg-white text-gray-600 border border-gray-100 hover:bg-gray-900 hover:text-white hover:border-gray-900': slot.disponible && horaSeleccionada() !== slot.hora,
+                                                'bg-gray-50 text-gray-300 border border-transparent cursor-not-allowed decoration-slice': !slot.disponible
+                                            }"
+                            class="py-2.5 px-2 rounded-lg text-sm font-light transition-all duration-300 text-center">
+                            {{ slot.hora }}
+                        </button>
+                        }
+                    </div>
+                    } @else {
+                    <div class="flex flex-col items-center justify-center h-48 text-gray-400">
+                        <p class="text-sm font-light italic">No hay horarios por la mañana</p>
+                    </div>
+                    }
+                    }
+
+                    @if (turnoVista() === 'tarde') {
+                    @if (slotsTarde().length > 0) {
+                    <div class="grid grid-cols-3 gap-3 animate-in fade-in zoom-in-95 duration-300">
+                        @for (slot of slotsTarde(); track slot.hora) {
+                        <button type="button" [disabled]="!slot.disponible" (click)="seleccionarHora(slot.hora)"
+                            [ngClass]="{
+                                                'bg-black text-white shadow-lg shadow-black/20 scale-105': horaSeleccionada() === slot.hora,
+                                                'bg-white text-gray-600 border border-gray-100 hover:bg-gray-900 hover:text-white hover:border-gray-900': slot.disponible && horaSeleccionada() !== slot.hora,
+                                                'bg-gray-50 text-gray-300 border border-transparent cursor-not-allowed decoration-slice': !slot.disponible
+                                            }"
+                            class="py-2.5 px-2 rounded-lg text-sm font-light transition-all duration-300 text-center">
+                            {{ slot.hora }}
+                        </button>
+                        }
+                    </div>
+                    } @else {
+                    <div class="flex flex-col items-center justify-center h-48 text-gray-400">
+                        <p class="text-sm font-light italic">No hay horarios por la tarde</p>
+                    </div>
+                    }
+                    }
+                </div>
+            </div>
+            } @else {
+            <div class="flex-1 flex flex-col items-center justify-center text-center py-12">
+                <p class="text-sm text-gray-400 font-light italic">Sin horarios disponibles.</p>
+            </div>
+            }
+            } @else {
+            <div class="h-full flex flex-col items-center justify-center text-center py-12 text-gray-400">
+                <svg class="size-8 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm font-light">Selecciona un día para ver horarios</p>
+            </div>
             }
         </div>
-        } @else {
-        <div class="flex-1 flex flex-col items-center justify-center text-center p-4">
-            <div class="bg-white p-3 rounded-full mb-3">
-                <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <p class="text-sm text-gray-600">No hay horarios disponibles para este día.</p>
-        </div>
-        }
-        } @else {
-        <div class="flex-1 flex flex-col items-center justify-center text-center p-4">
-            <div class="bg-white p-3 rounded-full mb-3">
-                <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <p class="text-sm text-gray-600">Selecciona una fecha en el calendario para ver los horarios.</p>
-        </div>
-        }
     </div>
 </div>

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { addDoc, collection, collectionData, deleteDoc, doc, DocumentData, DocumentReference, Firestore, getDoc, getDocs, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, deleteDoc, doc, DocumentData, DocumentReference, Firestore, getDoc, getDocs, query, setDoc, updateDoc, where, onSnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -52,4 +52,28 @@ export class FirestoreService {
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 
+  async getDocumentsByFilter<T>(path: string, fileName: string, value: string): Promise<T[]> {
+    const collectionRef = collection(this.firestore, path);
+    const q = query(collectionRef, where(fileName, "==", value));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as T));
+  }
+
+  getCollectionSnapshotByFilter<T>(path: string, fileName: string, value: string): Observable<T[]> {
+    const collectionRef = collection(this.firestore, path);
+    const q = query(collectionRef, where(fileName, "==", value));
+
+    return new Observable(observer => {
+      const unsubscribe = onSnapshot(q,
+        (snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as T));
+          observer.next(data);
+        },
+        (error) => {
+          observer.error(error);
+        }
+      );
+      return () => unsubscribe();
+    });
+  }
 }

@@ -33,7 +33,7 @@ export class SacarTurnoComponent implements OnInit, OnDestroy {
 
   // Stepper state
   pasoActual = signal<number>(1);
-  totalPasos = 4;
+  totalPasos = 5;
 
   // Datos del turno en construcción
   profesionalSeleccionado = signal<Profesional | null>(null);
@@ -47,6 +47,7 @@ export class SacarTurnoComponent implements OnInit, OnDestroy {
 
   // Estados
   isSubmitting = signal<boolean>(false);
+  isProcessingPayment = signal<boolean>(false);
   turnoCreado = signal<Turno | null>(null);
 
   // 🆕 Propiedades para polling
@@ -106,10 +107,23 @@ export class SacarTurnoComponent implements OnInit, OnDestroy {
     if (data.telefonoNotificaciones) {
       this.telefonoNotificaciones.set(data.telefonoNotificaciones);
     }
-    this.confirmarTurno();
+    // Ya no confirmamos aquí, vamos al pago
+    this.siguientePaso();
   }
 
-  // ==================== CONFIRMACIÓN ====================
+  // ==================== PAGO Y CONFIRMACIÓN ====================
+
+  async simularPago(): Promise<void> {
+    this.isProcessingPayment.set(true);
+
+    // Simular delay de 3 segundos
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Confirmar turno
+    await this.confirmarTurno();
+
+    this.isProcessingPayment.set(false);
+  }
 
   async confirmarTurno(): Promise<void> {
     const usuario = this.authService.currentUser();
@@ -129,7 +143,7 @@ export class SacarTurnoComponent implements OnInit, OnDestroy {
       const duracion = profesional.duracionConsulta || 30;
       const horaFin = this.calcularHoraFin(hora, duracion);
 
-      // 🔥 CREAR TURNO (sin teléfono si eligió WhatsApp)
+      // 🔥 CREAR TURNO (con pago)
       const nuevoTurno: Partial<Turno> = {
         pacienteId: usuario.uid,
         profesionalId: profesional.uid,
@@ -140,18 +154,23 @@ export class SacarTurnoComponent implements OnInit, OnDestroy {
         notificacionesWhatsApp: this.notificacionesWhatsApp(),
         telefonoNotificaciones: this.notificacionesWhatsApp()
           ? null // Se actualizará con polling
-          : this.telefonoNotificaciones() || null
+          : this.telefonoNotificaciones() || null,
+
+        // Datos de Pago
+        estadoPago: 'PAGADO',
+        monto: profesional.precioConsulta || 0,
+        metodoPago: 'TARJETA'
       };
 
       const turnoId = await this.turnoService.crearTurno(nuevoTurno);
 
       // Obtener turno creado
-      const turnos = await firstValueFrom(this.turnoService.getTurnosPorPaciente(usuario.uid));
+      const turnos = await this.turnoService.getTurnosPorPaciente(usuario.uid);
       const turnoCompleto = turnos?.find(t => t.id === turnoId);
 
       if (turnoCompleto) {
         this.turnoCreado.set(turnoCompleto);
-        this.siguientePaso(); // Ir a paso 4 (éxito)
+        this.siguientePaso(); // Ir a paso 5 (éxito)
 
         // 🔥 SI HABILITÓ WHATSAPP: Iniciar polling
         if (this.notificacionesWhatsApp()) {

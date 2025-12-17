@@ -1,117 +1,132 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- INFO PROFESIONAL Y FECHA -->
-    <div class="space-y-6">
-        <!-- Card Profesional -->
-        <div class="bg-white p-6 rounded-2xl border border-gray-200">
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Detalles del Turno</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+    <!-- COLUMNA IZQUIERDA: TU TURNO -->
+    <div>
+        <h3 class="text-xl font-light text-black mb-4 tracking-tight">Tu Turno</h3>
+        <hr class="border-gray-100 mb-6">
 
-            <div class="flex items-start gap-4 mb-6">
-                <div class="size-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
+        <div class="space-y-6">
+            <div class="flex items-start gap-4">
+                <div
+                    class="size-14 rounded-full bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
                     @if (profesional.fotoPerfil) {
                     <img [src]="profesional.fotoPerfil" class="size-full object-cover">
                     } @else {
-                    <span class="text-lg font-medium text-gray-500">
+                    <span class="text-base font-light text-gray-400">
                         {{ profesional.nombre[0] }}{{ profesional.apellido[0] }}
                     </span>
                     }
                 </div>
-                <div>
-                    <h4 class="text-lg font-medium text-gray-900">
+                <div class="space-y-0.5 pt-1">
+                    <h4 class="text-lg font-normal text-black leading-tight">
                         {{ profesional.nombre }} {{ profesional.apellido }}
                     </h4>
-                    <p class="text-sm text-gray-500">{{ profesional.tituloProfesional }}</p>
-                    <p class="text-xs text-gray-400 mt-1">M.N. {{ profesional.numeroMatriculaNacional }}</p>
+                    <p class="text-xs text-gray-500 font-light">{{ profesional.tituloProfesional }}</p>
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 mt-1">M.N. {{
+                        profesional.numeroMatriculaNacional }}</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                <div class="bg-white p-2 rounded-lg border border-gray-100">
-                    <svg class="size-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-900">
-                        {{ fecha | date:'EEEE d MMMM':'':'es' | titlecase }}
+            <div class="flex gap-4">
+                <div class="px-4 py-3 rounded-xl bg-gray-50 flex-1">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Fecha</p>
+                    <p class="text-sm font-medium text-gray-900 capitalize leading-none">
+                        {{ fecha | date:'EEEE d MMMM':'':'es' }}
                     </p>
-                    <p class="text-xs text-gray-500">A las {{ hora }} hs</p>
+                </div>
+                <div class="px-4 py-3 rounded-xl bg-gray-50 flex-1">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Hora</p>
+                    <p class="text-sm font-medium text-gray-900 leading-none">{{ hora }} hs</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Info Adicional -->
-        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
-            <svg class="size-5 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm text-blue-800">
-                Recuerda llegar 10 minutos antes de tu cita. Si no puedes asistir, por favor cancela con 24hs de
-                anticipación.
-            </p>
+            <div class="flex gap-3 items-start p-3 rounded-lg border border-dashed border-gray-200">
+                <svg class="size-4 mt-0.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-[11px] text-gray-500 font-light leading-relaxed">
+                    Recuerda llegar 10 minutos antes. Cancelaciones con 24hs de anticipación.
+                </p>
+            </div>
         </div>
     </div>
 
-    <!-- FORMULARIO -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-200 h-fit">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- COLUMNA DERECHA: TUS DATOS -->
+    <div>
+        <h3 class="text-xl font-light text-black mb-4 tracking-tight">Tus Datos</h3>
+        <hr class="border-gray-100 mb-6">
 
-            <!-- Motivo -->
-            <div>
-                <label for="motivo" class="block text-sm font-medium text-gray-700 mb-1">
-                    Motivo de Consulta (Opcional)
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+
+            <!-- Celular -->
+            <div class="space-y-1.5">
+                <label for="telefono" class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">
+                    Celular
                 </label>
-                <textarea id="motivo" formControlName="motivo" rows="3"
-                    class="w-full rounded-lg border-gray-200 text-sm focus:border-black focus:ring-black placeholder:text-gray-400"
-                    placeholder="Describe brevemente la razón de tu visita..."></textarea>
-            </div>
+                <div class="relative flex rounded-lg shadow-sm group h-[40px]">
+                    <div class="relative h-full">
+                        <button type="button" (click)="toggleDropdown()"
+                            class="inline-flex items-center gap-x-2 px-3 h-full bg-white text-gray-700 rounded-l-lg hover:bg-gray-50 focus:z-10 focus:ring-1 focus:ring-black transition-all border border-gray-200 border-r-0">
+                            <img [src]="selectedCountry().flagUrl" [alt]="selectedCountry().name"
+                                class="w-4 h-auto object-cover rounded-[2px] opacity-90">
+                            <span class="text-xs font-medium">{{ selectedCountry().dialCode }}</span>
+                            <svg class="size-2.5 text-gray-400 group-hover:text-gray-600 ml-0.5"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
 
-            <hr class="border-gray-100">
-
-            <!-- Datos de Contacto y Notificaciones -->
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-xl space-y-4">
-                    <!-- Checkbox WhatsApp (Preferencia) -->
-                    <div class="flex items-start gap-3">
-                        <div class="relative flex items-center h-6">
-                            <input id="notificacionesWhatsApp" type="checkbox" formControlName="notificacionesWhatsApp"
-                                class="size-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600">
+                        @if (isDropdownOpen()) {
+                        <div
+                            class="absolute z-50 mt-1 w-[200px] max-h-[220px] overflow-y-auto bg-white rounded-xl shadow-lg border border-gray-100 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-200">
+                            @for (country of countries; track country.code) {
+                            <button type="button" (click)="selectCountry(country)"
+                                class="w-full flex items-center gap-x-3 py-2 px-2 rounded-lg text-xs text-gray-700 hover:bg-gray-50 transition-all">
+                                <img [src]="country.flagUrl" [alt]="country.name"
+                                    class="w-4 h-auto object-cover rounded-[2px]">
+                                <span class="flex-1 text-left truncate">{{ country.name }}</span>
+                                <span class="text-gray-400">{{ country.dialCode }}</span>
+                            </button>
+                            }
                         </div>
-                        <label for="notificacionesWhatsApp" class="text-sm">
-                            <span class="font-medium text-gray-900">Recibir confirmación por WhatsApp</span>
-                            <p class="text-gray-500 text-xs mt-0.5">Te enviaremos los detalles y recordatorios a tu
-                                celular.
-                            </p>
-                        </label>
-                    </div>
-
-                    <!-- Input Teléfono (Siempre visible y obligatorio) -->
-                    <div class="pl-7">
-                        <label for="telefono" class="block text-xs font-medium text-gray-700 mb-1">
-                            Número de Celular (Obligatorio)
-                        </label>
-                        <input id="telefono" type="tel" formControlName="telefonoNotificaciones"
-                            class="w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500"
-                            placeholder="+54911...">
-
-                        @if (isFieldInvalid('telefonoNotificaciones')) {
-                        <p class="text-xs text-red-500 mt-1">Ingresa un número válido (ej: +54911...)</p>
                         }
                     </div>
+
+                    <div class="relative w-full h-full">
+                        <input id="telefono" type="tel"
+                            class="w-full h-full bg-white border border-gray-200 rounded-r-lg focus:border-black focus:ring-1 focus:ring-black px-3 text-sm font-light text-gray-900 placeholder-gray-300 transition-all"
+                            placeholder="11 1234 5678" formControlName="telefonoNotificaciones">
+                    </div>
                 </div>
+                @if (isFieldInvalid('telefonoNotificaciones')) {
+                <p class="text-[10px] text-red-500 font-medium ml-1">Campo requerido</p>
+                }
+            </div>
+
+            <!-- Motivo -->
+            <div class="space-y-1.5">
+                <label for="motivo" class="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">
+                    Motivo (Opcional)
+                </label>
+                <textarea id="motivo" formControlName="motivo" rows="2"
+                    class="w-full rounded-lg border border-gray-200 bg-white text-xs font-light focus:border-black focus:ring-1 focus:ring-black placeholder:text-gray-300 resize-none p-3"
+                    placeholder="Breve descripción..."></textarea>
             </div>
 
             <!-- Botón Submit -->
-            <button type="submit" [disabled]="isSubmitting || form.invalid"
-                class="w-full py-3 px-4 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                @if (isSubmitting) {
-                <div class="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Confirmando...
-                } @else {
-                Confirmar Turno
-                }
-            </button>
+            <div class="pt-2">
+                <button type="submit" [disabled]="isSubmitting || form.invalid"
+                    class="w-full h-[42px] rounded-lg bg-black text-white text-xs uppercase tracking-widest font-bold hover:bg-gray-900 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300 flex items-center justify-center gap-2">
+                    @if (isSubmitting) {
+                    <div class="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Procesando</span>
+                    } @else {
+                    <span>Confirmar Reserva</span>
+                    }
+                </button>
+            </div>
+
         </form>
     </div>
 </div>

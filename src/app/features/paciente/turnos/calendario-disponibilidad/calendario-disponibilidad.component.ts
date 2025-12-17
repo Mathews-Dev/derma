@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TurnoService } from '../../../../core/services/turno.service';
 import { Profesional } from '../../../../core/interfaces/profesional.model';
@@ -28,16 +28,39 @@ export class CalendarioDisponibilidadComponent implements OnChanges {
   fechaSeleccionada = signal<Date | null>(null);
   horaSeleccionada = signal<string | null>(null);
 
+  // Tab seleccionado por defecto 'manana'
+  turnoVista = signal<'manana' | 'tarde'>('manana');
+
+  // Computados para agrupación
+  slotsManana = computed(() => this.slotsDelDia().filter(s => parseInt(s.hora.split(':')[0]) < 13));
+  slotsTarde = computed(() => this.slotsDelDia().filter(s => parseInt(s.hora.split(':')[0]) >= 13));
+
   constructor() {
     this.generarCalendario();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['profesional'] && !changes['profesional'].firstChange) {
-      this.fechaSeleccionada.set(null);
-      this.horaSeleccionada.set(null);
-      this.slotsDelDia.set([]);
+    if (changes['profesional']) {
+      this.seleccionarManana();
     }
+  }
+
+  seleccionarManana(): void {
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    manana.setHours(0, 0, 0, 0);
+
+    // Ajustar mes si mañana cambia de mes
+    if (manana.getMonth() !== this.mesActual().getMonth()) {
+      const mesManana = new Date(manana);
+      mesManana.setDate(1);
+      this.mesActual.set(mesManana);
+      this.generarCalendario();
+    }
+
+    this.fechaSeleccionada.set(manana);
+    this.horaSeleccionada.set(null);
+    this.cargarSlots(manana);
   }
 
   // ==================== CALENDARIO ====================
@@ -81,10 +104,10 @@ export class CalendarioDisponibilidadComponent implements OnChanges {
   }
 
   async seleccionarFecha(fecha: Date): Promise<void> {
-    // Validar que no sea fecha pasada
+    // Validar que no sea fecha pasada (ni hoy)
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    if (fecha < hoy) return;
+    if (fecha <= hoy) return;
 
     // Validar que sea día laboral del profesional (opcional, ya filtrado en UI)
 
@@ -96,7 +119,8 @@ export class CalendarioDisponibilidadComponent implements OnChanges {
   esFechaPasada(fecha: Date): boolean {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    return fecha < hoy;
+    // Deshabilitar hoy y días anteriores
+    return fecha <= hoy;
   }
 
   esMismoDia(d1: Date, d2: Date | null): boolean {
@@ -121,7 +145,23 @@ export class CalendarioDisponibilidadComponent implements OnChanges {
   async cargarSlots(fecha: Date): Promise<void> {
     this.isLoadingSlots.set(true);
     try {
-      const slots = await this.turnoService.calcularDisponibilidad(this.profesional.uid, fecha);
+      let slots = await this.turnoService.calcularDisponibilidad(this.profesional.uid, fecha);
+
+      // 🔥 Validar Si es Hoy: Filtrar horarios pasados
+      const ahora = new Date();
+      if (this.esMismoDia(fecha, ahora)) {
+        const horaActual = ahora.getHours();
+        const minActual = ahora.getMinutes();
+
+        slots = slots.filter(slot => {
+          const [hSlot, mSlot] = slot.hora.split(':').map(Number);
+          // Permitir solo turnos futuros (ej: si son 17:15, el turno de 17:00 ya no sale, el de 17:30 sí)
+          if (hSlot > horaActual) return true;
+          if (hSlot === horaActual && mSlot > minActual) return true;
+          return false;
+        });
+      }
+
       this.slotsDelDia.set(slots);
     } catch (error) {
       console.error('Error cargando slots:', error);

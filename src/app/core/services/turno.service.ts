@@ -28,21 +28,39 @@ export class TurnoService {
         return docRef.id;
     }
 
-    /**
-     * Obtener turnos de un paciente
-     */
-    getTurnosPorPaciente(pacienteId: string): Observable<Turno[]> {
-        return this.firestoreService.getCollectionByFilter<Turno>(
+    getTurnosPorPacienteRealTime(pacienteId: string): Observable<Turno[]> {
+        return this.firestoreService.getCollectionSnapshotByFilter<Turno>(
             'turnos',
             'pacienteId',
             pacienteId
         ).pipe(
-            map(turnos => turnos.sort((a, b) => {
-                const fechaA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha);
-                const fechaB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha);
-                return fechaB.getTime() - fechaA.getTime();
-            }))
+            map(turnos => turnos.map(t => {
+                const fecha = (t.fecha as any)?.toDate ? (t.fecha as any).toDate() : new Date(t.fecha);
+                return { ...t, fecha };
+            }).sort((a, b) => b.fecha.getTime() - a.fecha.getTime()))
         );
+    }
+
+    /**
+     * Obtener turnos de un paciente (Promise)
+     */
+    async getTurnosPorPaciente(pacienteId: string): Promise<Turno[]> {
+        const turnos = await this.firestoreService.getDocumentsByFilter<Turno>(
+            'turnos',
+            'pacienteId',
+            pacienteId
+        );
+
+        return turnos.map(t => {
+            // Convertir Timestamp a Date
+            const fecha = (t.fecha as any)?.toDate ? (t.fecha as any).toDate() : new Date(t.fecha);
+            return {
+                ...t,
+                fecha: fecha
+            };
+        }).sort((a, b) => {
+            return b.fecha.getTime() - a.fecha.getTime();
+        });
     }
 
     /**
@@ -125,22 +143,15 @@ export class TurnoService {
         nuevaFecha: Date,
         nuevaHora: string,
         motivo: string
-    ): Promise<string> {
-        // 1. Obtener turno original
+    ): Promise<void> {
+        // 1. Obtener turno original para sacar profesional y calcular fin
         const turnoOriginal = await this.firestoreService.getDocumentById<Turno>('turnos', turnoId);
 
         if (!turnoOriginal) {
             throw new Error('Turno no encontrado');
         }
 
-        // 2. Marcar turno original como REPROGRAMADO
-        await this.firestoreService.updateDocument('turnos', turnoId, {
-            estado: EstadoTurno.REPROGRAMADO,
-            motivoReprogramacion: motivo,
-            fechaModificacion: Timestamp.now()
-        });
-
-        // 3. Calcular horaFin basado en duracionConsulta del profesional
+        // 2. Calcular horaFin
         const profesional = await this.firestoreService.getDocumentById<Profesional>(
             'usuarios',
             turnoOriginal.profesionalId
@@ -148,25 +159,15 @@ export class TurnoService {
 
         const horaFin = this.calcularHoraFin(nuevaHora, profesional?.duracionConsulta || 30);
 
-        // 4. Crear nuevo turno
-        const nuevoTurno: any = {
-            pacienteId: turnoOriginal.pacienteId,
-            profesionalId: turnoOriginal.profesionalId,
-            tratamientoId: turnoOriginal.tratamientoId || null,
+        // 3. ACTUALIZAR el turno existente (no crear uno nuevo)
+        await this.firestoreService.updateDocument('turnos', turnoId, {
             fecha: Timestamp.fromDate(nuevaFecha),
             horaInicio: nuevaHora,
-            horaFin,
-            estado: EstadoTurno.PENDIENTE,
-            motivo: turnoOriginal.motivo || null,
-            notificacionesWhatsApp: turnoOriginal.notificacionesWhatsApp || false,
-            telefonoNotificaciones: turnoOriginal.telefonoNotificaciones || null,
-            turnoOriginalId: turnoId,
+            horaFin: horaFin,
+            estado: EstadoTurno.REPROGRAMADO, // O PENDIENTE, según regla de negocio. Dejamos Reprogramado para indicar cambio.
             motivoReprogramacion: motivo,
-            fechaCreacion: Timestamp.now()
-        };
-
-        const docRef = await this.firestoreService.addDocument('turnos', nuevoTurno);
-        return docRef.id;
+            fechaModificacion: Timestamp.now()
+        });
     }
 
     // ==================== DISPONIBILIDAD ====================

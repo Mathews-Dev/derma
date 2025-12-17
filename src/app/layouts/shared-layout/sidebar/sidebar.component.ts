@@ -2,6 +2,7 @@ import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { RouterModule } from "@angular/router";
 import { GsapAnimationService } from '../../../core/services/gsap-animation.service';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class SidebarComponent {
 
   private _gsapService = inject(GsapAnimationService);
+  public authService = inject(AuthService);
 
   @Output() openInvite = new EventEmitter<void>();
 

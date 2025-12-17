@@ -1,7 +1,10 @@
-<div class="relative w-full min-h-screen bg-gray-50 pb-20">
+<div class="relative w-full min-h-screen bg-white pb-10">
     <!-- HEADER -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-5xl mx-auto px-6 py-6">
+    <div class="bg-white pt-8 pb-2 relative">
+        <div class="mx-auto px-6 py-6 transition-all duration-500" [ngClass]="{
+            'max-w-[95%] 2xl:max-w-[85%]': pasoActual() === 1,
+            'max-w-5xl': pasoActual() > 1
+        }">
             <div class="flex items-center justify-between">
                 <!-- Título -->
                 <div class="relative pl-4">
@@ -14,18 +17,17 @@
                     </p>
                 </div>
 
-                <!-- Stepper Progress -->
-                <div class="flex items-center gap-2">
-                    @for (paso of [1, 2, 3, 4]; track paso) {
-                    <div class="flex items-center gap-2">
-                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-medium transition-all"
+                <!-- Stepper Progress (Minimalist) -->
+                <div class="flex items-center gap-3">
+                    @for (paso of [1, 2, 3, 4, 5]; track paso) {
+                    <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500 border"
                             [ngClass]="{
-                                    'bg-black text-white': pasoActual() === paso,
-                                    'bg-emerald-500 text-white': pasoActual() > paso,
-                                    'bg-gray-200 text-gray-500': pasoActual() < paso
+                                    'bg-black text-white border-black': pasoActual() >= paso,
+                                    'bg-white text-gray-300 border-gray-200': pasoActual() < paso
                                 }">
                             @if (pasoActual() > paso) {
-                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7" />
                             </svg>
@@ -33,7 +35,8 @@
                             {{ paso }}
                             }
                         </div>
-                        @if (paso < 4) { <div class="w-12 h-0.5 bg-gray-200">
+                        @if (paso < 5) { <div class="w-8 h-px bg-gray-100 transition-colors duration-500"
+                            [ngClass]="{'bg-black': pasoActual() > paso}">
                     </div>
                     }
                 </div>
@@ -44,7 +47,10 @@
 </div>
 
 <!-- CONTENIDO -->
-<div class="max-w-5xl mx-auto px-6 py-8">
+<div class="mx-auto px-6 py-8 transition-all duration-500" [ngClass]="{
+    'max-w-[95%] 2xl:max-w-[85%]': pasoActual() === 1,
+    'max-w-5xl': pasoActual() > 1
+}">
     <!-- PASO 1: Selección de Profesional -->
     @if (pasoActual() === 1) {
     <app-profesional-selector (profesionalSeleccionado)="onProfesionalSeleccionado($event)">
@@ -53,7 +59,7 @@
 
     <!-- PASO 2: Selección de Fecha y Hora -->
     @if (pasoActual() === 2 && profesionalSeleccionado()) {
-    <div class="space-y-6">
+    <div class="space-y-6 max-w-5xl mx-auto">
         <button type="button" (click)="pasoAnterior()"
             class="flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors">
             <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +76,7 @@
 
     <!-- PASO 3: Confirmación -->
     @if (pasoActual() === 3 && profesionalSeleccionado() && fechaSeleccionada() && horaSeleccionada()) {
-    <div class="space-y-6">
+    <div class="space-y-6 max-w-5xl mx-auto">
         <button type="button" (click)="pasoAnterior()"
             class="flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors">
             <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,159 +92,183 @@
     </div>
     }
 
-    <!-- PASO 4: Éxito y Validación -->
-    @if (pasoActual() === 4) {
-    <div class="max-w-3xl mx-auto space-y-6">
+    <!-- PASO 4: Pago Simulado -->
+    @if (pasoActual() === 4 && profesionalSeleccionado()) {
+    <div class="max-w-xl mx-auto space-y-8 py-10 animate-in fade-in duration-500">
+        <div class="text-center space-y-2">
+            <h3 class="text-2xl font-light text-black">Resumen de Pago</h3>
+            <p class="text-gray-500 text-sm font-light">Estás a un paso de confirmar tu cita.</p>
+        </div>
 
-        <!-- CALL TO ACTION: VALIDACIÓN (PRIORIDAD ALTA) -->
-        <!-- CALL TO ACTION: VALIDACIÓN -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-8 md:p-12 text-center">
+        <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100 flex flex-col gap-4 shadow-sm">
+            <div class="flex justify-between items-center text-sm font-light">
+                <span class="text-gray-500">Consulta Dermatológica</span>
+                <span class="font-medium text-black">1 Sesión</span>
+            </div>
+            <div class="flex justify-between items-center text-sm font-light">
+                <span class="text-gray-500">Profesional</span>
+                <span class="font-medium text-black">{{ profesionalSeleccionado()?.nombre }} {{
+                    profesionalSeleccionado()?.apellido }}</span>
+            </div>
 
-                <!-- Icono Status -->
-                <div
-                    class="inline-flex items-center justify-center size-16 rounded-full bg-black text-white mb-6 shadow-xl shadow-black/10">
-                    <svg class="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                    </svg>
-                </div>
+            <div class="h-px bg-gray-200 my-4 border-dashed"></div>
 
-                <h3 class="text-2xl font-medium text-gray-900 mb-3 tracking-tight">
-                    Turno Reservado
-                </h3>
-
-                <p class="text-gray-500 max-w-md mx-auto mb-10 text-sm leading-relaxed">
-                    Para confirmar tu asistencia, escanea el código o envía el mensaje predefinido por WhatsApp.
-                </p>
-
-                <!-- QR y Botón Container -->
-                <div class="flex flex-col items-center gap-8">
-
-                    <!-- QR Code -->
-                    <div class="flex flex-col items-center gap-3">
-                        <div class="bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
-                            @if (turnoCreado()) {
-                            <img [src]="getQrUrl(turnoCreado()!)" alt="QR WhatsApp"
-                                class="size-40 object-contain mix-blend-multiply">
-                            }
-                        </div>
-                        <span class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Escanear QR</span>
-                    </div>
-
-                    <!-- Botón WhatsApp -->
-                    @if (turnoCreado()) {
-                    <a [href]="getWhatsappLink(turnoCreado()!)" target="_blank"
-                        class="group inline-flex items-center gap-3 px-8 py-3.5 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all w-full md:w-auto justify-center shadow-lg shadow-black/5">
-                        <svg class="size-5 text-emerald-400 group-hover:text-emerald-300 transition-colors"
-                            fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                        </svg>
-                        <span>Validar por WhatsApp</span>
-                    </a>
-                    }
-                    <!-- 🆕 INDICADOR DE VALIDACIÓN -->
-                    <div *ngIf="turnoCreado()?.notificacionesWhatsApp && !turnoCreado()?.telefonoNotificaciones"
-                        class="mt-6 p-4 rounded-lg" [ngClass]="{
-       'bg-blue-50 border border-blue-200': estadoValidacion() === 'esperando',
-       'bg-green-50 border border-green-200': estadoValidacion() === 'validado',
-       'bg-yellow-50 border border-yellow-200': estadoValidacion() === 'timeout'
-     }">
-
-                        <!-- Esperando validación -->
-                        <div *ngIf="estadoValidacion() === 'esperando'" class="flex items-center justify-center gap-3">
-                            <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
-                            <div class="text-sm text-blue-800">
-                                <p class="font-medium">Esperando validación de WhatsApp...</p>
-                                <p class="text-xs mt-1">Escanea el QR y envía el mensaje</p>
-                            </div>
-                        </div>
-
-                        <!-- Validado exitosamente -->
-                        <div *ngIf="estadoValidacion() === 'validado'" class="flex items-center justify-center gap-3">
-                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <div class="text-sm text-green-800">
-                                <p class="font-medium">✅ Teléfono validado exitosamente</p>
-                                <p class="text-xs mt-1">{{ turnoCreado()?.telefonoNotificaciones }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Timeout -->
-                        <div *ngIf="estadoValidacion() === 'timeout'" class="text-center">
-                            <div class="flex items-center justify-center gap-2 text-yellow-800 mb-2">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <p class="font-medium text-sm">Tiempo de espera agotado</p>
-                            </div>
-                            <p class="text-xs text-yellow-700">No se recibió la validación. Puedes validar más tarde
-                                desde "Mis Turnos".</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-medium text-black">Total a Pagar</span>
+                <span class="text-2xl font-bold text-black tracking-tight">${{
+                    (profesionalSeleccionado()?.precioConsulta || 0) | number:'1.0-0' }}</span>
             </div>
         </div>
 
-        <!-- RESUMEN COMPACTO (SECUNDARIO) -->
-        <div
-            class="bg-white rounded-xl border border-gray-200 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
-            <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Resumen del Turno</h4>
+        @if (isProcessingPayment()) {
+        <div class="flex flex-col items-center justify-center gap-6 py-8">
+            <div class="relative size-12">
+                <div class="absolute inset-0 rounded-full border-2 border-gray-100"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-black border-t-transparent animate-spin">
+                </div>
             </div>
-            @if (turnoCreado()) {
+            <div class="text-center space-y-1">
+                <p class="text-xs font-bold uppercase tracking-widest text-black">Procesando Pago</p>
+                <p class="text-[10px] text-gray-400 font-mono">Simulando transacción segura...</p>
+            </div>
+        </div>
+        } @else {
+        <div class="space-y-4">
+            <button (click)="simularPago()"
+                class="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-900 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3 group">
+                <svg class="size-5 text-gray-400 group-hover:text-white transition-colors" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span>Pagar y Confirmar</span>
+            </button>
+            <button (click)="pasoAnterior()"
+                class="w-full text-center text-xs text-gray-400 font-medium uppercase tracking-widest hover:text-black transition-colors py-2">
+                Volver
+            </button>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- PASO 5: Éxito y Validación (Antes era Paso 4) -->
+    @if (pasoActual() === 5) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-start max-w-5xl mx-auto">
+
+        <!-- COLUMNA IZQUIERDA: ÉXITO Y ACCIONES -->
+        <div class="flex flex-col items-center md:items-start text-center md:text-left">
+            <!-- Icono Status -->
             <div
-                class="p-6 flex flex-col sm:flex-row gap-6 justify-between items-center sm:items-start text-center sm:text-left">
-                <!-- Profesional -->
-                <div class="flex items-center gap-3">
-                    <div class="size-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="font-medium text-gray-900">{{ profesionalSeleccionado()?.nombre }}</p>
-                        <p class="text-xs text-gray-500">{{ profesionalSeleccionado()?.tituloProfesional ||
-                            'Dermatólogo' }}</p>
+                class="inline-flex items-center justify-center size-20 rounded-full bg-black text-white mb-8 shadow-2xl shadow-black/20">
+                <svg class="size-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                </svg>
+            </div>
+
+            <h3 class="text-4xl font-light text-black mb-4 tracking-tighter">
+                Turno Reservado
+            </h3>
+
+            <p class="text-gray-500 mb-10 text-base leading-relaxed font-light max-w-sm">
+                Hemos reservado tu cita con éxito. Para finalizar, valida tu número escaneando el QR a continuación.
+            </p>
+
+            <!-- QR y Acciones -->
+            <div class="flex flex-col gap-6 w-full max-w-sm">
+                <!-- QR Code -->
+                <div class="flex items-center gap-6 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                    @if (turnoCreado()) {
+                    <img [src]="getQrUrl(turnoCreado()!)" alt="QR WhatsApp"
+                        class="size-24 object-contain mix-blend-multiply bg-white rounded-lg p-1">
+                    }
+                    <div class="flex-1 space-y-1">
+                        <p class="text-xs font-bold uppercase tracking-widest text-black">Validar Celular</p>
+                        <p class="text-[11px] text-gray-500 font-light leading-snug">
+                            Escanea el QR o haz clic en el botón para enviar el mensaje de validación.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Fecha -->
-                <div class="flex items-center gap-3">
-                    <div class="size-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="font-medium text-gray-900 capitalize">{{ fechaSeleccionada() |
-                            date:'EEEE,dMMMM':'':'es'}}
-                        </p>
-                        <p class="text-xs text-gray-500">{{ horaSeleccionada() }} horas</p>
-                    </div>
+                <!-- Botón WhatsApp -->
+                @if (turnoCreado()) {
+                <a [href]="getWhatsappLink(turnoCreado()!)" target="_blank"
+                    class="group flex items-center justify-center gap-3 px-6 py-4 bg-black text-white rounded-xl font-medium hover:bg-gray-900 transition-all shadow-xl shadow-black/10">
+                    <svg class="size-5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                    <span>Abrir WhatsApp</span>
+                </a>
+                }
+            </div>
+
+            <!-- STATUS VALIDACION -->
+            @if (turnoCreado()?.notificacionesWhatsApp && !turnoCreado()?.telefonoNotificaciones) {
+            <div class="mt-8 w-full max-w-sm">
+                <!-- Esperando -->
+                @if (estadoValidacion() === 'esperando') {
+                <div class="flex items-center gap-3 text-gray-500 animate-pulse">
+                    <div class="size-2 rounded-full bg-black"></div>
+                    <span class="text-xs uppercase tracking-widest font-medium">Esperando validación...</span>
                 </div>
+                }
+                <!-- Validado -->
+                @if (estadoValidacion() === 'validado') {
+                <div class="flex items-center gap-3 text-black">
+                    <div class="size-2 rounded-full bg-emerald-500"></div>
+                    <span class="text-xs uppercase tracking-widest font-bold">Validado Exitosamente</span>
+                </div>
+                }
+                <!-- Timeout -->
+                @if (estadoValidacion() === 'timeout') {
+                <div class="flex items-center gap-3 text-gray-400">
+                    <div class="size-2 rounded-full bg-gray-300"></div>
+                    <span class="text-xs uppercase tracking-widest">Tiempo Agotado</span>
+                </div>
+                }
             </div>
             }
         </div>
 
-        <div class="flex justify-center pt-4">
-            <button type="button" (click)="volverAMisTurnos()"
-                class="text-sm font-medium text-gray-400 hover:text-gray-800 transition-colors uppercase tracking-wider">
-                Saltar y Ver Mis Turnos
-            </button>
+        <!-- COLUMNA DERECHA: RESUMEN (CLEAN) -->
+        <div class="pt-8 md:pt-0">
+            <h4 class="text-xl font-light text-black mb-6 tracking-tight">Tu Reserva</h4>
+            <div class="space-y-8">
+
+                <div class="flex gap-5 border-l-2 border-black pl-6 py-1">
+                    <div class="space-y-1">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Profesional</p>
+                        <p class="text-lg font-medium text-black">{{ profesionalSeleccionado()?.nombre }}</p>
+                        <p class="text-xs text-gray-500 font-light">{{ profesionalSeleccionado()?.tituloProfesional ||
+                            'Especialista' }}</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-5 border-l-2 border-gray-100 pl-6 py-1">
+                    <div class="space-y-1">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Fecha</p>
+                        <p class="text-lg font-medium text-black capitalize">{{ fechaSeleccionada() | date:'EEEE d
+                            MMMM':'':'es'}}</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-5 border-l-2 border-gray-100 pl-6 py-1">
+                    <div class="space-y-1">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Hora</p>
+                        <p class="text-lg font-medium text-black">{{ horaSeleccionada() }} hs</p>
+                        <p class="text-[10px] text-gray-400 leading-none">Arg</p>
+                    </div>
+                </div>
+
+                <div class="pt-12">
+                    <button type="button" (click)="volverAMisTurnos()"
+                        class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors border-b border-transparent hover:border-black pb-0.5">
+                        Ir a Mis Turnos &rarr;
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     }

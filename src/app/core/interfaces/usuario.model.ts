@@ -62,6 +62,7 @@ export interface Profesional extends Usuario {
     numeroMatriculaNacional: string;
     numeroMatriculaProvincial: string;
     tituloProfesional: string; // Ej: Cirujano Plástico
+    precioConsulta?: number;
 
     horariosLaborales: HorariosLaborales;
     duracionConsulta: number; // minutos

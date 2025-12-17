@@ -91,23 +91,49 @@
                         </span>
                     </div>
 
-                    <div routerLink="/paciente/citas"
-                        class="relative rounded-3xl bg-gray-50 p-8 transition-all duration-300 hover:bg-black hover:text-white cursor-pointer overflow-hidden border border-gray-100 dark-hover h-full">
+                    @if (isLoadingTurno()) {
+                    <!-- SKELETON LOADER -->
+                    <div class="rounded-3xl bg-gray-50 p-8 h-full border border-gray-100 animate-pulse">
+                        <div class="flex flex-col justify-between h-full gap-8">
+                            <div>
+                                <div class="h-12 w-32 bg-gray-200 rounded-lg mb-2"></div>
+                                <div class="h-4 w-48 bg-gray-200 rounded-md"></div>
+                            </div>
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <div class="h-6 w-40 bg-gray-200 rounded-md mb-2"></div>
+                                    <div class="h-3 w-24 bg-gray-200 rounded-md"></div>
+                                </div>
+                                <div class="size-8 rounded-full bg-gray-200"></div>
+                            </div>
+                        </div>
+                    </div>
+                    } @else if (proximoTurno()) {
+                    <!-- CARD CON DATOS -->
+                    <div routerLink="/paciente/mis-turnos"
+                        class="relative rounded-3xl bg-gray-50 p-8 transition-all duration-300 hover:bg-black hover:text-white cursor-pointer overflow-hidden border border-gray-100 group h-full">
 
                         <div class="relative z-10 flex flex-col justify-between h-full gap-8">
                             <div>
                                 <div class="flex items-baseline gap-2 mb-1">
-                                    <h2 class="text-5xl font-extralight tracking-tighter">10:30</h2>
-                                    <span class="text-sm font-light opacity-60 uppercase">AM</span>
+                                    <h2 class="text-5xl font-extralight tracking-tighter">
+                                        {{ proximoTurno()?.horaInicio }}
+                                    </h2>
+                                    <span class="text-sm font-light opacity-60 uppercase">HS</span>
                                 </div>
-                                <p class="text-sm font-light opacity-80">Lunes, 15 de Diciembre</p>
+                                <p class="text-sm font-light opacity-80 capitalize">
+                                    {{ textoFecha() }}
+                                </p>
                             </div>
 
                             <div class="flex items-end justify-between">
                                 <div>
-                                    <h3 class="text-xl font-light tracking-tight mb-1">Botox Facial</h3>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">Dra. Ana
-                                        García</p>
+                                    <h3 class="text-xl font-light tracking-tight mb-1">
+                                        Consulta Presencial
+                                    </h3>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">
+                                        {{ profesionalTurno()?.nombre }} {{ profesionalTurno()?.apellido }}
+                                    </p>
                                 </div>
                                 <div
                                     class="size-8 rounded-full border border-current flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -124,6 +150,24 @@
                             class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                         </div>
                     </div>
+                    } @else {
+                    <!-- EMPTY STATE -->
+                    <div routerLink="/paciente/sacar-turno"
+                        class="relative rounded-3xl bg-white p-8 transition-all duration-300 hover:border-black cursor-pointer overflow-hidden border border-gray-100 h-full flex flex-col justify-center items-center text-center gap-4 group">
+                        <div
+                            class="size-12 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                            <svg class="size-6 text-gray-400 group-hover:text-white" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Sin citas próximas</p>
+                            <p class="text-xs text-gray-500 mt-1">Agendar nueva consulta</p>
+                        </div>
+                    </div>
+                    }
                 </div>
 
                 <!-- SECCIÓN: MI RUTINA -->

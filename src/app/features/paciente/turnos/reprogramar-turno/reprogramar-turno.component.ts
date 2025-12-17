@@ -36,7 +36,7 @@ export class ReprogramarTurnoComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      motivo: ['', [Validators.required, Validators.minLength(10)]]
+      motivo: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(250)]]
     });
   }
 
@@ -49,13 +49,30 @@ export class ReprogramarTurnoComponent implements OnInit {
 
   async cargarDatosTurno(id: string): Promise<void> {
     try {
-      const turno = await this.firestoreService.getDocumentById<Turno>('turnos', id);
+      const turnoData = await this.firestoreService.getDocumentById<Turno>('turnos', id);
 
-      if (turno) {
-        this.turnoActual.set(turno);
+      if (turnoData) {
+        // Normalizar fecha
+        const fechaTurno = (turnoData.fecha as any)?.toDate
+          ? (turnoData.fecha as any).toDate()
+          : new Date(turnoData.fecha);
+
+        const turnoConFecha = { ...turnoData, fecha: fechaTurno };
+        this.turnoActual.set(turnoConFecha);
+
+        // 🛑 VALIDACIÓN 24 HORAS
+        const ahora = new Date();
+        const diferenciaMs = fechaTurno.getTime() - ahora.getTime();
+        const horasRestantes = diferenciaMs / (1000 * 60 * 60);
+
+        if (horasRestantes < 24) {
+          alert('⚠️ No se puede reprogramar el turno con menos de 24 horas de anticipación.\n\nPor favor, comunícate con la administración.');
+          this.router.navigate(['/paciente/mis-turnos']);
+          return;
+        }
 
         // Cargar profesional
-        const profesional = await this.firestoreService.getDocumentById<Profesional>('usuarios', turno.profesionalId);
+        const profesional = await this.firestoreService.getDocumentById<Profesional>('usuarios', turnoData.profesionalId);
         if (profesional) {
           this.profesional.set(profesional);
         }
@@ -65,6 +82,8 @@ export class ReprogramarTurnoComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error cargando turno:', error);
+      alert('Error al cargar la información del turno');
+      this.router.navigate(['/paciente/mis-turnos']);
     } finally {
       this.isLoading.set(false);
     }

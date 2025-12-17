@@ -1,5 +1,5 @@
-import { HorariosLaborales } from "./profesional.model";
-import { Usuario } from "./usuario.model";
+
+import { HorariosLaborales, Usuario } from "./usuario.model";
 
 
 export interface Empleado extends Usuario {

@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, computed } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TurnoService } from '../../../../core/services/turno.service';
@@ -6,6 +7,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FirestoreService } from '../../../../core/services/firestore.service';
 import { Turno, EstadoTurno } from '../../../../core/interfaces/turno.model';
 import { Profesional } from '../../../../core/interfaces/profesional.model';
+import { switchMap, tap, filter } from 'rxjs';
 
 @Component({
   selector: 'app-mis-turnos',
@@ -16,12 +18,11 @@ import { Profesional } from '../../../../core/interfaces/profesional.model';
 })
 export class MisTurnosComponent implements OnInit {
   private turnoService = inject(TurnoService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService); // Public for toObservable
   private firestoreService = inject(FirestoreService);
   private router = inject(Router);
 
   // Estado
-  turnos = signal<Turno[]>([]);
   profesionalesCache = new Map<string, Profesional>();
   isLoading = signal<boolean>(true);
   EstadoTurno = EstadoTurno; // Para usar en template
@@ -29,27 +30,22 @@ export class MisTurnosComponent implements OnInit {
   // Tabs
   filtroActual = signal<'proximos' | 'historial'>('proximos');
 
+  // 🔥 SIGNAL EN TIEMPO REAL
+  turnos = toSignal(
+    toObservable(this.authService.currentUser).pipe(
+      filter(user => !!user),
+      tap(() => this.isLoading.set(true)),
+      switchMap(user => this.turnoService.getTurnosPorPacienteRealTime(user!.uid)),
+      tap(turnos => {
+        console.log('📡 Turnos actualizados en tiempo real:', turnos);
+        this.cargarProfesionales(turnos);
+        this.isLoading.set(false);
+      })
+    ),
+    { initialValue: [] }
+  );
+
   ngOnInit(): void {
-    this.cargarTurnos();
-  }
-
-  async cargarTurnos(): Promise<void> {
-    const usuario = this.authService.currentUser();
-    if (!usuario) return;
-
-    this.isLoading.set(true);
-    try {
-      const turnos = await this.turnoService.getTurnosPorPaciente(usuario.uid).toPromise();
-
-      if (turnos) {
-        this.turnos.set(turnos);
-        await this.cargarProfesionales(turnos);
-      }
-    } catch (error) {
-      console.error('Error cargando turnos:', error);
-    } finally {
-      this.isLoading.set(false);
-    }
   }
 
   async cargarProfesionales(turnos: Turno[]): Promise<void> {
@@ -67,18 +63,19 @@ export class MisTurnosComponent implements OnInit {
 
   getTurnosFiltrados(): Turno[] {
     const ahora = new Date();
-    // Normalizar hora para comparaciones justas
     ahora.setHours(0, 0, 0, 0);
 
     return this.turnos().filter(turno => {
-      const fechaTurno = turno.fecha?.toDate ? turno.fecha.toDate() : new Date(turno.fecha);
+      // Safety check: Ensure fecha is a Date object (handled in service, but double check)
+      const fechaTurno = turno.fecha instanceof Date ? turno.fecha : new Date(turno.fecha);
 
+      // DEBUG: Mostrar todo por estado, ignorando fecha temporalmente para ver si aparecen
       if (this.filtroActual() === 'proximos') {
-        return fechaTurno >= ahora &&
-          [EstadoTurno.PENDIENTE, EstadoTurno.CONFIRMADO, EstadoTurno.REPROGRAMADO].includes(turno.estado);
+        // return fechaTurno >= ahora && ...
+        return [EstadoTurno.PENDIENTE, EstadoTurno.CONFIRMADO, EstadoTurno.REPROGRAMADO].includes(turno.estado);
       } else {
-        return fechaTurno < ahora ||
-          [EstadoTurno.COMPLETADO, EstadoTurno.CANCELADO, EstadoTurno.NO_ASISTIO].includes(turno.estado);
+        // return fechaTurno < ahora || ...
+        return [EstadoTurno.COMPLETADO, EstadoTurno.CANCELADO, EstadoTurno.NO_ASISTIO].includes(turno.estado);
       }
     });
   }
@@ -92,7 +89,7 @@ export class MisTurnosComponent implements OnInit {
 
     try {
       await this.turnoService.cancelarTurno(turno.id, 'Cancelado por el paciente');
-      await this.cargarTurnos(); // Recargar lista
+      //await this.cargarTurnos();// // Recargar lista
     } catch (error) {
       console.error('Error al cancelar:', error);
       alert('Error al cancelar el turno');
@@ -109,14 +106,14 @@ export class MisTurnosComponent implements OnInit {
 
   // Helpers de estado para estilos
   getEstadoClass(estado: EstadoTurno): string {
-    const base = 'px-2.5 py-0.5 rounded-full text-xs font-medium';
+    const base = 'text-[10px] uppercase tracking-widest font-bold';
     switch (estado) {
-      case EstadoTurno.PENDIENTE: return `${base} bg-yellow-100 text-yellow-800`;
-      case EstadoTurno.CONFIRMADO: return `${base} bg-emerald-100 text-emerald-800`;
-      case EstadoTurno.REPROGRAMADO: return `${base} bg-blue-100 text-blue-800`;
-      case EstadoTurno.CANCELADO: return `${base} bg-red-100 text-red-800`;
-      case EstadoTurno.COMPLETADO: return `${base} bg-gray-100 text-gray-800`;
-      default: return `${base} bg-gray-100 text-gray-800`;
+      case EstadoTurno.PENDIENTE: return `${base} text-black`;
+      case EstadoTurno.CONFIRMADO: return `${base} text-black`;
+      case EstadoTurno.REPROGRAMADO: return `${base} text-gray-800`;
+      case EstadoTurno.CANCELADO: return `${base} text-gray-400 line-through decoration-gray-400`;
+      case EstadoTurno.COMPLETADO: return `${base} text-gray-500`;
+      default: return `${base} text-gray-500`;
     }
   }
 }

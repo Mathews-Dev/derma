@@ -143,6 +143,20 @@ export const routes: Routes = [
             }
         ]
     },
+
+    // ============================================
+    // RUTAS PRIVADAS - MEDICA (DERMATOLOGO)
+    // ============================================
+    {
+        path: 'medica',
+        component: PrivateLayoutComponent,
+        children: [
+            {
+                path: 'agenda',
+                loadComponent: () => import('./features/medica/agenda-medica/agenda-medica.component').then(m => m.AgendaMedicaComponent)
+            },
+        ]
+    },
     // ============================================
     // RUTAS PRIVADAS - RECEPCIONISTA
     // ============================================

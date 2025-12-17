@@ -29,6 +29,11 @@ export interface Turno {
     // Historial de Reprogramación
     turnoOriginalId?: string | null; // Si fue reprogramado, referencia al turno anterior
     motivoReprogramacion?: string | null;
+
+    // Pago
+    estadoPago: 'PENDIENTE' | 'PAGADO';
+    monto: number;
+    metodoPago?: 'TARJETA' | 'EFECTIVO';
 }
 
 export interface SlotHorario {

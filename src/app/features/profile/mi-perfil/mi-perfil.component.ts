@@ -44,6 +44,7 @@ export class MiPerfilComponent implements OnInit {
       numeroMatriculaNacional: [''],
       numeroMatriculaProvincial: [''],
       duracionConsulta: [30],
+      precioConsulta: [0],
       tituloProfesional: [''], // Ej: Cirujano Plástico
       horariosLaborales: [{}], // Initialize with empty object instead of null
       honorarios: this.formBuilder.array([]), // Array de objetos
@@ -97,6 +98,7 @@ export class MiPerfilComponent implements OnInit {
         numeroMatriculaNacional: prof.numeroMatriculaNacional || '',
         numeroMatriculaProvincial: prof.numeroMatriculaProvincial || '',
         duracionConsulta: prof.duracionConsulta || 30,
+        precioConsulta: prof.precioConsulta || 0,
         tituloProfesional: prof.tituloProfesional || '',
         horariosLaborales: prof.horariosLaborales || {},
       });
@@ -195,6 +197,7 @@ export class MiPerfilComponent implements OnInit {
         dataToUpdate['numeroMatriculaNacional'] = formVal.numeroMatriculaNacional;
         dataToUpdate['numeroMatriculaProvincial'] = formVal.numeroMatriculaProvincial;
         dataToUpdate['duracionConsulta'] = formVal.duracionConsulta;
+        dataToUpdate['precioConsulta'] = formVal.precioConsulta;
         dataToUpdate['tituloProfesional'] = formVal.tituloProfesional;
         dataToUpdate['horariosLaborales'] = formVal.horariosLaborales;
         dataToUpdate['honorarios'] = formVal.honorarios;
