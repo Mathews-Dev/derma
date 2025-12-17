@@ -11,6 +11,7 @@ export interface Turno {
     id: string;
     pacienteId: string; // Usuario que solicita
     profesionalId: string; // Dermatólogo asignado
+    tipo?: 'consulta' | 'tratamiento'; // Diferencia visual en agenda
     tratamientoId?: string | null; // Opcional: Si es para un tratamiento específico
     fecha: Date | any; // Día del turno (Firestore Timestamp)
     horaInicio: string; // "09:00"

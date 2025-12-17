@@ -1,0 +1,185 @@
+<div class="min-h-screen bg-white">
+    <!-- Header de Navegación -->
+    <div class="border-b border-gray-100 bg-white sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <button (click)="goBack()"
+                class="group flex items-center gap-2 text-gray-400 hover:text-black transition-colors">
+                <svg class="size-5 transition-transform group-hover:-translate-x-1" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide">Volver a Agenda</span>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                    Consulta en Curso
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div class="animate-pulse flex flex-col items-center">
+            <div class="h-10 w-10 border-2 border-gray-200 border-t-black rounded-full animate-spin mb-4"></div>
+            <p class="text-xs text-gray-400 uppercase tracking-widest">Cargando Historia Clínica...</p>
+        </div>
+    </div>
+    } @else {
+    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- COLUMNA IZQUIERDA: RESUMEN PACIENTE (4 cols) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Tarjeta Paciente -->
+            <div class="bg-gray-50 rounded-[24px] p-8 border border-gray-100 sticky top-24">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="h-16 w-16 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl font-bold text-gray-900 shadow-sm uppercase">
+                        {{ paciente()?.nombre?.charAt(0) }}{{ paciente()?.apellido?.charAt(0) }}
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-black leading-tight">
+                            {{ paciente()?.nombre }} {{ paciente()?.apellido }}
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-0.5">DNI: {{ paciente()?.dni || '---' }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Motivo Turno</p>
+                        <p class="text-sm text-gray-900 font-medium leading-relaxed">{{ turno()?.motivo || 'No
+                            especificado' }}</p>
+                    </div>
+
+                    <!-- Datos Rápidos (Con botones de edición si faltan) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div
+                            class="p-3 bg-white rounded-xl border border-gray-100 group cursor-pointer hover:border-gray-300 transition-colors">
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Edad</p>
+                            @if (paciente()?.edad) {
+                            <p class="text-sm font-medium">{{ paciente()?.edad }} Años</p>
+                            } @else {
+                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1">
+                                --
+                                <svg class="size-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                </svg>
+                            </p>
+                            }
+                        </div>
+                        <div
+                            class="p-3 bg-white rounded-xl border border-gray-100 group cursor-pointer hover:border-gray-300 transition-colors">
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Tipo Piel</p>
+                            @if (paciente()?.perfilEstetico?.biotipo) {
+                            <p class="text-sm font-medium capitalize">{{ paciente()?.perfilEstetico?.biotipo }}</p>
+                            } @else {
+                            <p class="text-sm font-medium text-gray-400 flex items-center gap-1">
+                                Definir
+                                <svg class="size-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                </svg>
+                            </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: CONSULTA ACTIVA (8 cols) -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- SECCION 1: ANAMNESIS / NOTAS -->
+            <div class="bg-white rounded-[24px] border border-gray-200 p-8 shadow-sm">
+                <h3 class="text-lg font-light text-black mb-6 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                    Notas de Consulta (Diagnóstico)
+                </h3>
+
+                <textarea
+                    class="w-full min-h-[150px] p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all resize-none placeholder-gray-400"
+                    placeholder="Escribe aquí las observaciones clínicas, síntomas y evolución..."></textarea>
+            </div>
+
+            <!-- SECCION 2: PLAN DE TRATAMIENTO (Dinámico) -->
+            <div class="bg-black text-white rounded-[24px] p-8 shadow-xl">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h3 class="text-xl font-light text-white mb-1">Planifcar Tratamiento / Sesión</h3>
+                        <p class="text-gray-400 text-xs uppercase tracking-wider">Selecciona qué se hará próximamente
+                        </p>
+                    </div>
+                </div>
+
+                @if (loadingTratamientos()) {
+                <div class="flex justify-center p-8">
+                    <div class="h-6 w-6 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
+                </div>
+                } @else {
+                <div class="space-y-8">
+
+                    <!-- QUIRÚRGICOS (Prioridad) -->
+                    @if (tratamientosQuirurgicos().length > 0) {
+                    <div>
+                        <h4
+                            class="text-[10px] uppercase tracking-widest text-red-400 font-bold mb-4 flex items-center gap-2">
+                            <span class="w-1 h-1 rounded-full bg-red-500"></span> Intervenciones
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @for (t of tratamientosQuirurgicos(); track t.id) {
+                            <button
+                                class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-red-500/50 hover:bg-white/10 transition-all">
+                                <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">Requiere Consentimiento</p>
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- FACIALES -->
+                    @if (tratamientosFaciales().length > 0) {
+                    <div>
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Facial</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @for (t of tratamientosFaciales(); track t.id) {
+                            <button
+                                class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all">
+                                <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
+                                <p class="text-[10px] text-gray-400 mt-1">{{ t.duracion }} min · {{ t.precio | currency
+                                    }}</p>
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- OTROS -->
+                    @if (tratamientosCorporales().length > 0) {
+                    <div>
+                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Corporal</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @for (t of tratamientosCorporales(); track t.id) {
+                            <button
+                                class="group relative overflow-hidden rounded-xl bg-white/5 p-4 text-left border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all">
+                                <p class="text-sm font-medium text-white">{{ t.nombre }}</p>
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                </div>
+                }
+
+            </div>
+
+        </div>
+    </div>
+    }
+</div>

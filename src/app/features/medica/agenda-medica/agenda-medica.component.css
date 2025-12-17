@@ -1,16 +1,19 @@
-.ng-calendar-wrapper {
-  width: 100%;
-  height: 600px;
-  max-height: 70vh;
-  overflow-y: auto;
+::ng-deep .sx__event-modal__description,
+::ng-deep .sx__event-modal p {
+  white-space: pre-wrap !important;
 }
 
-/* Reducir altura de las filas de tiempo */
-.ng-calendar-wrapper ::ng-deep .sx__time-grid-hour {
-  min-height: 40px !important;
-  height: 40px !important;
+::ng-deep .sx__week-grid__day-name {
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+  color: #6b7280 !important;
+  /* Gray-500 */
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
-.ng-calendar-wrapper ::ng-deep .sx__time-grid-day {
-  min-height: 40px !important;
+::ng-deep .sx__week-grid__date-number {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  /* Gray-900 */
 }

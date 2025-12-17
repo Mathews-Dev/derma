@@ -155,6 +155,10 @@ export const routes: Routes = [
                 path: 'agenda',
                 loadComponent: () => import('./features/medica/agenda-medica/agenda-medica.component').then(m => m.AgendaMedicaComponent)
             },
+            {
+                path: 'consulta/:turnoId',
+                loadComponent: () => import('./features/medica/consulta-activa/consulta-activa.component').then(m => m.ConsultaActivaComponent)
+            }
         ]
     },
     // ============================================

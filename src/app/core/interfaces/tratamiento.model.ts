@@ -1,4 +1,4 @@
-export type CategoriaTratamiento = 'facial' | 'corporal' | 'piel' | 'capilar' | 'bienestar' | 'otro';
+export type CategoriaTratamiento = 'facial' | 'corporal' | 'piel' | 'capilar' | 'bienestar' | 'quirurgico' | 'otro';
 
 export interface Tratamiento {
     id: string;
@@ -27,32 +27,24 @@ export interface Tratamiento {
 
 export interface TratamientoPaciente {
     id: string;
-    uidPaciente: string;
-    idTratamiento: string;
-    nombreTratamiento: string;
-    fechaInicio: Date;
-    estado: 'programado' | 'en_curso' | 'finalizado' | 'cancelado';
-    sesionesTotales: number;
-    sesionesRealizadas: number;
-    progreso: number; // Porcentaje 0-100
-    proximaSesion?: Date;
-    notas?: string;
-}
-
-export interface TratamientoPaciente {
-    id: string;
-    pacienteId: string;
+    uidPaciente: string;        // Unified to uidPaciente (or pacienteId, picking one) - let's use pacienteId to match other models
+    pacienteId: string;         // Keeping explicit naming
     tratamientoId: string;
-    tratamientoNombre: string;
+    nombreTratamiento: string;
     profesionalId: string;
     profesionalNombre: string;
-    sesionesTotales: number;
-    sesionesCompletadas: number;
     fechaInicio: Date;
     fechaFinEstimada?: Date;
-    // estado: 'activo' | 'completado' | 'pausado' | 'cancelado';
+    estado: 'programado' | 'en_curso' | 'finalizado' | 'cancelado' | 'pausado';
+
+    // Sesiones
+    sesionesTotales: number;
+    sesionesRealizadas: number; // Renamed from sesionesCompletadas for consistency
+    progreso: number;           // Porcentaje 0-100
     proximaSesion?: Date;
+
+    // Datos Clinicos
     notas?: string;
     resultados?: string;
-    satisfaccion?: number; // 1-5
+    satisfaccion?: number;      // 1-5
 }
