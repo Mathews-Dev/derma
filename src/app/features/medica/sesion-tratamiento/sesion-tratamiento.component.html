@@ -31,19 +31,23 @@
     <div class="px-8 py-4 bg-gray-50">
         <div class="max-w-5xl mx-auto">
             <div class="flex items-center justify-between">
-                @for (step of [1,2,3,4,5]; track step) {
-                <div class="flex items-center" [class.flex-1]="step < 5">
+                @for (step of stepsArray(); track step; let idx = $index) {
+                <div class="flex items-center" [class.flex-1]="idx < stepsArray().length - 1">
                     <!-- Step Circle -->
                     <div class="flex items-center justify-center w-8 h-8 rounded-full transition-all"
-                        [class.bg-black]="currentStep() >= step" [class.text-white]="currentStep() >= step"
-                        [class.bg-white]="currentStep() < step" [class.text-gray-300]="currentStep() < step"
-                        [class.ring-1]="currentStep() < step" [class.ring-gray-200]="currentStep() < step">
-                        <span class="text-xs font-semibold">{{ step }}</span>
+                        [class.bg-black]="currentStep() === step || stepsArray().indexOf(currentStep()) > idx"
+                        [class.text-white]="currentStep() === step || stepsArray().indexOf(currentStep()) > idx"
+                        [class.bg-white]="currentStep() !== step && stepsArray().indexOf(currentStep()) <= idx"
+                        [class.text-gray-300]="currentStep() !== step && stepsArray().indexOf(currentStep()) <= idx"
+                        [class.ring-1]="currentStep() !== step && stepsArray().indexOf(currentStep()) <= idx"
+                        [class.ring-gray-200]="currentStep() !== step && stepsArray().indexOf(currentStep()) <= idx">
+                        <span class="text-xs font-semibold">{{ idx + 1 }}</span>
                     </div>
 
                     <!-- Line -->
-                    @if (step < 5) { <div class="flex-1 h-px mx-2 transition-all"
-                        [class.bg-black]="currentStep() > step" [class.bg-gray-200]="currentStep() <= step">
+                    @if (idx < stepsArray().length - 1) { <div class="flex-1 h-px mx-2 transition-all"
+                        [class.bg-black]="stepsArray().indexOf(currentStep()) > idx"
+                        [class.bg-gray-200]="stepsArray().indexOf(currentStep()) <= idx">
                 </div>
                 }
             </div>
@@ -52,16 +56,12 @@
 
         <!-- Step Labels -->
         <div class="flex items-center justify-between mt-2">
-            <span class="text-xs font-light" [class.text-black]="currentStep() === 1"
-                [class.text-gray-400]="currentStep() !== 1">Instrucciones</span>
-            <span class="text-xs font-light" [class.text-black]="currentStep() === 2"
-                [class.text-gray-400]="currentStep() !== 2">Próxima Sesión</span>
-            <span class="text-xs font-light" [class.text-black]="currentStep() === 3"
-                [class.text-gray-400]="currentStep() !== 3">Foto Antes</span>
-            <span class="text-xs font-light" [class.text-black]="currentStep() === 4"
-                [class.text-gray-400]="currentStep() !== 4">Notas</span>
-            <span class="text-xs font-light" [class.text-black]="currentStep() === 5"
-                [class.text-gray-400]="currentStep() !== 5">Foto Después</span>
+            @for (step of stepsArray(); track step) {
+            <span class="text-xs font-light transition-colors" [class.text-black]="currentStep() === step"
+                [class.font-semibold]="currentStep() === step" [class.text-gray-400]="currentStep() !== step">
+                {{ getLabelForStep(step) }}
+            </span>
+            }
         </div>
     </div>
 </div>
@@ -104,6 +104,51 @@
                 <button (click)="agregarInstruccion()"
                     class="text-black text-sm font-bold w-8 h-8 flex items-center justify-center hover:bg-gray-50 rounded-full">+</button>
             </div>
+
+        </div>
+        }
+
+        <!-- STEP 6: CONSENTIMIENTO INFORMADO (Solo S1) -->
+        @if (currentStep() === 6) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Consentimiento Informado</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Escanea o captura el documento firmado por el paciente
+                </p>
+            </div>
+
+            @if (mostrarCamaraConsentimiento()) {
+            <div class="mb-6">
+                <app-captura-foto (fotoCapturada)="onFotoConsentimientoCapturada($event)"></app-captura-foto>
+            </div>
+            }
+
+            @if (documentoConsentimiento()) {
+            <div
+                class="max-w-md mx-auto aspect-3/4 relative group bg-gray-50 border border-gray-100 overflow-hidden rounded-2xl shadow-sm">
+                <img [src]="documentoConsentimiento()" class="w-full h-full object-contain">
+                <div
+                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button (click)="eliminarConsentimiento()"
+                        class="px-6 py-2 bg-white text-black text-xs font-semibold rounded-full hover:bg-gray-100 transition-colors">
+                        Eliminar y Repetir
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (!mostrarCamaraConsentimiento() && !documentoConsentimiento()) {
+            <div class="flex gap-4">
+                <button (click)="mostrarCamaraConsentimiento.set(true)"
+                    class="flex-1 py-4 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    Cámara PC
+                </button>
+                <button (click)="generarQRParaFoto('consentimiento')"
+                    class="flex-1 py-4 bg-white text-black text-sm font-semibold ring-1 ring-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    Escáner Celular (QR)
+                </button>
+            </div>
+            }
         </div>
         }
 
@@ -115,6 +160,14 @@
                 <p class="text-sm font-light text-gray-400 mt-1">Programa el siguiente encuentro</p>
             </div>
 
+            @if (esUltimaSesion()) {
+            <div class="p-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-center">
+                <h3 class="text-lg font-semibold text-black mt-4">Tratamiento Finalizado</h3>
+                <p class="text-sm font-light text-gray-400 mt-2 max-w-xs mx-auto">
+                    Esta es la última sesión planificada originalmente para este tratamiento.
+                </p>
+            </div>
+            } @else {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Fecha</label>
@@ -133,15 +186,19 @@
                     Nota: El turno se creará automáticamente al finalizar esta sesión.
                 </p>
             </div>
+            }
         </div>
         }
 
-        <!-- STEP 3: FOTO ANTES (Única) -->
+        <!-- STEP 3: FOTO INICIAL / PROGRESO -->
         @if (currentStep() === 3) {
         <div class="space-y-6">
             <div>
-                <h2 class="text-lg font-semibold text-black">Fotografía Antes</h2>
-                <p class="text-sm font-light text-gray-400 mt-1">Captura el estado inicial</p>
+                <h2 class="text-lg font-semibold text-black">{{ labelFotoAntes() }}</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">
+                    @if (numeroSesion() === 1) { Captura el estado inicial antes de comenzar }
+                    @else { Documenta el progreso desde la última vez }
+                </p>
             </div>
 
             @if (mostrarCamaraAntes()) {
@@ -168,11 +225,11 @@
             <div class="flex gap-4">
                 <button (click)="mostrarCamaraAntes.set(true)"
                     class="flex-1 py-4 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-all flex items-center justify-center gap-2 rounded-xl">
-                    <span class="text-lg">📷</span> Cámara PC
+                    Cámara PC
                 </button>
                 <button (click)="generarQRParaFoto('antes')"
                     class="flex-1 py-4 bg-white text-black text-sm font-semibold ring-1 ring-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2 rounded-xl">
-                    <span class="text-lg">📱</span> Cámara Celular
+                    Cámara Celular
                 </button>
             </div>
             }
@@ -237,12 +294,16 @@
         </div>
         }
 
-        <!-- STEP 5: FOTO DESPUÉS (Única) -->
+        <!-- STEP 5: FOTO FINAL / RESULTADO -->
         @if (currentStep() === 5) {
         <div class="space-y-6">
             <div>
-                <h2 class="text-lg font-semibold text-black">Fotografía Después</h2>
-                <p class="text-sm font-light text-gray-400 mt-1">Captura el resultado final</p>
+                <h2 class="text-lg font-semibold text-black">{{ labelFotoDespues() }}</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">
+                    @if (numeroSesion() === 1) { Solo toma esta foto si hubo un cambio inmediato o reacción }
+                    @else if (esUltimaSesion()) { Captura el resultado final del tratamiento completo }
+                    @else { Documenta el resultado de la sesión de hoy }
+                </p>
             </div>
 
             @if (mostrarCamaraDespues()) {
@@ -269,11 +330,11 @@
             <div class="flex gap-4">
                 <button (click)="mostrarCamaraDespues.set(true)"
                     class="flex-1 py-4 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-all flex items-center justify-center gap-2 rounded-xl">
-                    <span class="text-lg">📷</span> Cámara PC
+                    Cámara PC
                 </button>
                 <button (click)="generarQRParaFoto('despues')"
                     class="flex-1 py-4 bg-white text-black text-sm font-semibold ring-1 ring-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2 rounded-xl">
-                    <span class="text-lg">📱</span> Cámara Celular
+                    Cámara Celular
                 </button>
             </div>
             }
@@ -296,7 +357,7 @@
                     </button>
                     }
 
-                    @if (currentStep() < totalSteps) { <button (click)="nextStep()"
+                    @if (currentStep() < totalSteps()) { <button (click)="nextStep()"
                         class="px-8 py-2 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-colors">
                         Siguiente →
                         </button>

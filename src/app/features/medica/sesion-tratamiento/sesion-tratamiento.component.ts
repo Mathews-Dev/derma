@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { CapturaFotoComponent } from '../../../shared/components/captura-foto/captura-foto.component';
-import { ProgramarSesionComponent } from '../programar-sesion/programar-sesion.component';
+
 
 import { FirestoreService } from '../../../core/services/firestore.service';
 import { FotoProgresoService } from '../../../core/services/foto-progreso.service';
@@ -22,7 +22,7 @@ import { SesionTratamiento, ProductoUsado } from '../../../core/interfaces/sesio
 @Component({
   selector: 'app-sesion-tratamiento',
   standalone: true,
-  imports: [CommonModule, FormsModule, CapturaFotoComponent, ProgramarSesionComponent, QRCodeComponent],
+  imports: [CommonModule, FormsModule, CapturaFotoComponent, QRCodeComponent],
   templateUrl: './sesion-tratamiento.component.html',
   styleUrl: './sesion-tratamiento.component.css'
 })
@@ -49,13 +49,16 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
 
   // Stepper
   currentStep = signal<number>(1);
-  totalSteps = 5;
+  totalSteps = signal<number>(5);
+  stepsArray = signal<number[]>([1, 2, 3, 4, 5]);
 
-  // Fotografías
+  // Fotografías y Documentos
   fotosAntes = signal<string[]>([]);
   fotosDespues = signal<string[]>([]);
+  documentoConsentimiento = signal<string | null>(null);
   mostrarCamaraAntes = signal<boolean>(false);
   mostrarCamaraDespues = signal<boolean>(false);
+  mostrarCamaraConsentimiento = signal<boolean>(false);
 
   // Formulario
   procedimientoRealizado = signal<string>('');
@@ -71,10 +74,17 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
   fechaProximaSesion = signal<string>('');
   horaProximaSesion = signal<string>('');
 
+  // Estado de la sesión
+  esSesionFinalManual = signal<boolean>(false);
+
+  // Labels dinámicos para fotos
+  labelFotoAntes = signal<string>('Foto Antes');
+  labelFotoDespues = signal<string>('Foto Después');
+
   // QR Code
   qrSessionId = signal<string | null>(null);
   qrUrl = signal<string | null>(null);
-  qrTipo = signal<'antes' | 'despues' | null>(null);
+  qrTipo = signal<'antes' | 'despues' | 'consentimiento' | null>(null);
   mostrarQR = signal<boolean>(false);
   private qrSubscription?: Subscription;
 
@@ -137,6 +147,19 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
               this.instruccionesPost.set([...tratamientoBase.instruccionesPost]);
             }
           }
+
+          // ✅ Labels dinámicos por sesión
+          if (this.numeroSesion() === 1) {
+            this.labelFotoAntes.set('Foto Antes');
+            this.labelFotoDespues.set('Foto Después');
+          } else {
+            this.labelFotoAntes.set('Foto Progreso');
+            this.labelFotoDespues.set(this.esUltimaSesion() ? 'Foto Final' : 'Foto Después');
+          }
+
+          // ✅ Configuración inteligente por defecto
+          this.esSesionFinalManual.set(this.esUltimaSesion());
+          this.actualizarEstructuraStepper();
         }
       }
 
@@ -151,21 +174,66 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
     }
   }
 
-  // === STEPPER ===
+  // === ESTRUCTURA DINAMICA ===
+  actualizarEstructuraStepper() {
+    let steps: number[] = [];
+
+    if (this.numeroSesion() === 1) {
+      // Orden exacto solicitado: 1- Instrucciones, 2- NOTAS, 3- Proxima sesion, 4- Foto Antes, 5- Consentimiento
+      steps = [1, 4, 2, 3, 6];
+    } else {
+      // S>1: Instrucciones (1) -> Notas (4) -> Proxima (2) -> Foto Progreso (3) -> Foto Despues (5)
+      steps = [1, 4, 2, 3, 5];
+    }
+
+    this.stepsArray.set(steps);
+    this.totalSteps.set(steps.length);
+
+    // Asegurar que el currentStep sea válido
+    const stepsValidos = this.stepsArray();
+    if (!stepsValidos.includes(this.currentStep())) {
+      this.currentStep.set(1);
+    }
+  }
+
+  setTipoSesion(final: boolean) {
+    this.esSesionFinalManual.set(final);
+    this.actualizarEstructuraStepper();
+  }
+
+  get logicalCurrentStepIndex(): number {
+    return this.stepsArray().indexOf(this.currentStep()) + 1;
+  }
+
   nextStep() {
-    if (this.currentStep() < this.totalSteps) {
-      this.currentStep.update(s => s + 1);
+    const currentIndex = this.stepsArray().indexOf(this.currentStep());
+    if (currentIndex < this.stepsArray().length - 1) {
+      this.currentStep.set(this.stepsArray()[currentIndex + 1]);
     }
   }
 
   prevStep() {
-    if (this.currentStep() > 1) {
-      this.currentStep.update(s => s - 1);
+    const currentIndex = this.stepsArray().indexOf(this.currentStep());
+    if (currentIndex > 0) {
+      this.currentStep.set(this.stepsArray()[currentIndex - 1]);
     }
   }
 
-  goToStep(step: number) {
-    this.currentStep.set(step);
+  getLabelForStep(step: number): string {
+    switch (step) {
+      case 1: return 'Instrucciones';
+      case 4: return 'Notas';
+      case 2: return 'Próxima Sesión';
+      case 3: return this.labelFotoAntes();
+      case 6: return 'Consentimiento';
+      case 5: return this.labelFotoDespues();
+      default: return '';
+    }
+  }
+
+  toggleSesionFinal() {
+    this.esSesionFinalManual.update(v => !v);
+    this.actualizarEstructuraStepper();
   }
 
   // === FOTOGRAFÍAS (Limitado a una sola foto) ===
@@ -181,6 +249,15 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
 
   eliminarFotoAntes(index: number) {
     this.fotosAntes.set([]);
+  }
+
+  onFotoConsentimientoCapturada(base64: string) {
+    this.documentoConsentimiento.set(base64);
+    this.mostrarCamaraConsentimiento.set(false);
+  }
+
+  eliminarConsentimiento() {
+    this.documentoConsentimiento.set(null);
   }
 
   eliminarFotoDespues(index: number) {
@@ -218,18 +295,21 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
 
   // === VALIDACIÓN ===
   esValido(): boolean {
-    // Debe tener al menos una foto (antes o después)
-    const tieneFotos = this.fotosAntes().length > 0 || this.fotosDespues().length > 0;
     // Debe tener notas profesionales
     const tieneNotas = this.notasProfesional().trim() !== '';
 
-    return tieneFotos && tieneNotas;
+    // En S1 el consentimiento es mandatorio
+    if (this.numeroSesion() === 1 && !this.documentoConsentimiento()) {
+      return false;
+    }
+
+    return tieneNotas;
   }
 
   // === FINALIZAR SESIÓN ===
   async finalizarSesion() {
     if (!this.esValido()) {
-      alert('Debes agregar al menos una foto y escribir notas profesionales');
+      alert('Debes completar los requisitos obligatorios (Consentimiento si aplica y Notas)');
       return;
     }
 
@@ -240,40 +320,60 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
     try {
       const fotosIds: string[] = [];
 
-      // 1. Guardar fotos ANTES
-      for (const fotoBase64 of this.fotosAntes()) {
+      // 0. Guardar Consentimiento si existe
+      if (this.documentoConsentimiento()) {
         const foto: FotoProgreso = {
           id: this.firestoreService.createId(),
           pacienteId: this.paciente()!.uid,
           tratamientoId: this.tratamientoPaciente()!.id,
           tratamientoNombre: this.tratamientoPaciente()!.nombreTratamiento,
           fecha: new Date(),
-          tipo: 'antes',
+          tipo: 'consentimiento' as any,
+          sesionNumero: this.numeroSesion(),
+          imagenUrl: this.documentoConsentimiento()!,
+          notas: `Consentimiento informado - Sesión ${this.numeroSesion()}`,
+          visiblePaciente: true
+        };
+        await this.fotoService.guardarFoto(foto);
+      }
+
+      // 1. Guardar foto ANTES / DURANTE
+      for (const fotoBase64 of this.fotosAntes()) {
+        const tipo: 'antes' | 'durante' = this.numeroSesion() === 1 ? 'antes' : 'durante';
+        const foto: FotoProgreso = {
+          id: this.firestoreService.createId(),
+          pacienteId: this.paciente()!.uid,
+          tratamientoId: this.tratamientoPaciente()!.id,
+          tratamientoNombre: this.tratamientoPaciente()!.nombreTratamiento,
+          fecha: new Date(),
+          tipo: tipo,
           sesionNumero: this.numeroSesion(),
           imagenUrl: fotoBase64,
-          notas: `Sesión ${this.numeroSesion()} - Antes del tratamiento`,
+          notas: `Sesión ${this.numeroSesion()} - ${tipo === 'antes' ? 'Antes' : 'Durante/Progreso'}`,
           visiblePaciente: true
         };
         await this.fotoService.guardarFoto(foto);
         fotosIds.push(foto.id);
       }
 
-      // 2. Guardar fotos DESPUÉS
-      for (const fotoBase64 of this.fotosDespues()) {
-        const foto: FotoProgreso = {
-          id: this.firestoreService.createId(),
-          pacienteId: this.paciente()!.uid,
-          tratamientoId: this.tratamientoPaciente()!.id,
-          tratamientoNombre: this.tratamientoPaciente()!.nombreTratamiento,
-          fecha: new Date(),
-          tipo: 'despues',
-          sesionNumero: this.numeroSesion(),
-          imagenUrl: fotoBase64,
-          notas: `Sesión ${this.numeroSesion()} - Después del tratamiento`,
-          visiblePaciente: true
-        };
-        await this.fotoService.guardarFoto(foto);
-        fotosIds.push(foto.id);
+      // 2. Guardar fotos DESPUÉS (Solo en sesiones > 1)
+      if (this.numeroSesion() > 1) {
+        for (const fotoBase64 of this.fotosDespues()) {
+          const foto: FotoProgreso = {
+            id: this.firestoreService.createId(),
+            pacienteId: this.paciente()!.uid,
+            tratamientoId: this.tratamientoPaciente()!.id,
+            tratamientoNombre: this.tratamientoPaciente()!.nombreTratamiento,
+            fecha: new Date(),
+            tipo: 'despues',
+            sesionNumero: this.numeroSesion(),
+            imagenUrl: fotoBase64,
+            notas: `Sesión ${this.numeroSesion()} - Después del tratamiento`,
+            visiblePaciente: true
+          };
+          await this.fotoService.guardarFoto(foto);
+          fotosIds.push(foto.id);
+        }
       }
 
       // 3. Crear registro de SesionTratamiento
@@ -298,7 +398,7 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
       // 4. Actualizar TratamientoPaciente
       const sesionesRealizadas = this.tratamientoPaciente()!.sesionesRealizadas + 1;
       const progreso = Math.round((sesionesRealizadas / this.tratamientoPaciente()!.sesionesTotales) * 100);
-      const nuevoEstado = sesionesRealizadas >= this.tratamientoPaciente()!.sesionesTotales
+      const nuevoEstado = (sesionesRealizadas >= this.tratamientoPaciente()!.sesionesTotales || this.esSesionFinalManual())
         ? 'finalizado'
         : 'en_curso';
 
@@ -314,13 +414,12 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
         notasProfesional: this.notasProfesional()
       });
 
-      // 6. Programar Siguiente Sesión (si se especificó en Step 2)
-      if (!this.esUltimaSesion() && this.fechaProximaSesion() && this.horaProximaSesion()) {
+      // 6. Programar Siguiente Sesión (si se especificó y no es final)
+      if (!this.esUltimaSesion() && !this.esSesionFinalManual() && this.fechaProximaSesion() && this.horaProximaSesion()) {
         const [año, mes, día] = this.fechaProximaSesion().split('-').map(Number);
         const [horaArr, minArr] = this.horaProximaSesion().split(':').map(Number);
         const fechaHora = new Date(año, mes - 1, día, horaArr, minArr);
 
-        // Calcular hora fin (45 min después)
         const fechaFin = new Date(fechaHora.getTime() + 45 * 60000);
         const horaFinStr = `${fechaFin.getHours().toString().padStart(2, '0')}:${fechaFin.getMinutes().toString().padStart(2, '0')}`;
 
@@ -336,21 +435,21 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
           motivo: `Sesión ${this.numeroSesion() + 1} - ${this.tratamientoPaciente()!.nombreTratamiento}`,
           fechaCreacion: new Date(),
           estadoPago: 'PENDIENTE',
-          monto: 0, // El monto se define en recepción
+          monto: 0,
           notificacionesWhatsApp: true
         };
 
         await this.turnoService.crearTurno(nuevoTurno as any);
-        alert(`✅ Sesión finalizada y próxima sesión programada para el ${fechaHora.toLocaleDateString()} a las ${this.horaProximaSesion()}`);
+        alert(`Sesión finalizada y próxima sesión programada.`);
       } else {
-        alert('✅ Sesión finalizada exitosamente');
+        alert('Sesión finalizada exitosamente');
       }
 
       this.router.navigate(['/medica/agenda']);
 
     } catch (error) {
       console.error('Error al finalizar sesión:', error);
-      alert('❌ Error al finalizar la sesión. Por favor intenta nuevamente.');
+      alert('Error al finalizar la sesión. Por favor intenta nuevamente.');
     } finally {
       this.guardando.set(false);
     }
@@ -359,7 +458,7 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
   // === PROGRAMACIÓN DE SIGUIENTE SESIÓN ===
   onSesionProgramada(turno: Turno): void {
     this.showSchedulingModal.set(false);
-    alert(`✅ Próxima sesión programada para ${new Date(turno.fecha).toLocaleDateString()}`);
+    alert(`Próxima sesión programada para ${new Date(turno.fecha).toLocaleDateString()}`);
     this.router.navigate(['/medica/agenda']);
   }
 
@@ -370,10 +469,20 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
   }
 
   // === QR CODE ===
-  generarQRParaFoto(tipo: 'antes' | 'despues') {
+  generarQRParaFoto(tipo: 'antes' | 'despues' | 'consentimiento') {
     const sessionId = this.firestoreService.createId();
-    const baseUrl = window.location.origin;
+    let baseUrl = window.location.origin;
+
+    // Verificación de conectividad móvil
+    if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
+      console.warn('⚠️ Estás en LOCALHOST. El QR no funcionará en móviles.');
+      console.info('👉 Tip: Usa el Reenvío de Puertos de VS Code o Tunnelmole/Ngrok y accede a la app DESDE ESA URL en tu PC.');
+    } else if (!baseUrl.startsWith('https')) {
+      console.warn('⚠️ No estás usando HTTPS. Es posible que la cámara no abra en algunos móviles.');
+    }
+
     const url = `${baseUrl}/captura-foto/${sessionId}/${tipo}`;
+    console.log('✅ QR URL generada correctamente:', url);
 
     this.qrSessionId.set(sessionId);
     this.qrUrl.set(url);
@@ -383,7 +492,7 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
     this.escucharFotoQR(sessionId, tipo);
   }
 
-  escucharFotoQR(sessionId: string, tipo: 'antes' | 'despues') {
+  escucharFotoQR(sessionId: string, tipo: 'antes' | 'despues' | 'consentimiento') {
     this.qrSubscription = this.firestoreService
       .getCollectionByFilter<any>('fotos_temp', 'sessionId', sessionId)
       .subscribe(fotos => {
@@ -392,8 +501,10 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
 
           if (tipo === 'antes') {
             this.fotosAntes.set([foto.imagenUrl]);
-          } else {
+          } else if (tipo === 'despues') {
             this.fotosDespues.set([foto.imagenUrl]);
+          } else if (tipo === 'consentimiento') {
+            this.documentoConsentimiento.set(foto.imagenUrl);
           }
 
           // Limpiar foto temporal
