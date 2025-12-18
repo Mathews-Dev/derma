@@ -1,0 +1,12 @@
+<div class="min-h-screen bg-white">
+    <div class="px-8 py-6">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-xl font-light text-black mb-6">Programar Próxima Sesión</h1>
+
+            <app-programar-sesion [pacienteId]="pacienteId()" [profesionalId]="profesionalId()"
+                [tratamientoNombre]="tratamientoNombre()" (sesionProgramada)="onSesionProgramada($event)"
+                (cancelar)="onCancelar()">
+            </app-programar-sesion>
+        </div>
+    </div>
+</div>

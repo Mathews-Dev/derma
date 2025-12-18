@@ -153,10 +153,16 @@ ng generate component shared/components/captura-foto --standalone --skip-tests
 ng generate component shared/components/visor-fotos --standalone --skip-tests
 ng generate component features/medica/consentimiento-form --standalone --skip-tests
 ng generate component features/medica/sesion-tratamiento --standalone --skip-tests
+ng generate component features/medica/programar-sesion-standalone --skip-tests
+ng generate component features/captura-foto-mobile --skip-tests
 
 # Servicios Fotografía y Consentimiento
 ng generate service core/services/foto-progreso --skip-tests
 ng generate service core/services/consentimiento --skip-tests
+ng generate service core/services/sesion-tratamiento --skip-tests
+
+# Instalación QR Code (Fase 3)
+npm install angularx-qrcode --force
 
 # Instalacion y configuración de Tailwind
 npm install tailwindcss @tailwindcss/postcss postcss --force

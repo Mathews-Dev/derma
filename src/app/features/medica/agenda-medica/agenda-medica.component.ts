@@ -8,7 +8,6 @@ import { createCalendar, createViewDay, createViewWeek, createViewMonthGrid, cre
 import { createCurrentTimePlugin } from '@schedule-x/current-time';
 import { createScrollControllerPlugin } from '@schedule-x/scroll-controller';
 import { createCalendarControlsPlugin } from '@schedule-x/calendar-controls';
-import '@schedule-x/theme-default/dist/index.css';
 import 'temporal-polyfill/global';
 import { TurnoService } from '../../../core/services/turno.service';
 import { FirestoreService } from '../../../core/services/firestore.service';

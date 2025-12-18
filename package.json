@@ -26,6 +26,7 @@
     "@schedule-x/scroll-controller": "^3.5.1",
     "@schedule-x/theme-default": "^3.5.1",
     "@tailwindcss/postcss": "^4.1.17",
+    "angularx-qrcode": "^21.0.4",
     "firebase": "^11.10.0",
     "gsap": "^3.13.0",
     "postcss": "^8.5.6",

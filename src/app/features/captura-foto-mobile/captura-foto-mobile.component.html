@@ -1,0 +1,29 @@
+<div class="min-h-screen bg-white p-4">
+    <div class="max-w-md mx-auto">
+        <h2 class="text-2xl font-bold mb-4 text-black">Capturar Foto</h2>
+        <p class="text-sm text-gray-500 mb-6">Tipo: {{ tipo() === 'antes' ? 'Antes del tratamiento' : 'Después del
+            tratamiento' }}</p>
+
+        @if (!fotoCapturada()) {
+        <app-captura-foto (fotoCapturada)="onFotoCapturada($event)">
+        </app-captura-foto>
+        } @else {
+        <img [src]="fotoCapturada()" class="w-full rounded-lg mb-4 border border-gray-200">
+
+        <div class="flex gap-2">
+            <button (click)="fotoCapturada.set(null)"
+                class="flex-1 py-3 bg-gray-200 text-black rounded-lg font-semibold">
+                Retomar
+            </button>
+            <button (click)="confirmarFoto()" [disabled]="enviando()"
+                class="flex-1 py-3 bg-green-600 text-white rounded-lg font-semibold disabled:opacity-50">
+                @if (enviando()) {
+                <span>Enviando...</span>
+                } @else {
+                <span>✓ Confirmar</span>
+                }
+            </button>
+        </div>
+        }
+    </div>
+</div>

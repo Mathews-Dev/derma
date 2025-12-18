@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+@import "@schedule-x/theme-default/dist/index.css";
 @import "preline/variants.css";
 @source "../node_modules/preline/dist/*.js";
 

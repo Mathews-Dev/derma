@@ -162,9 +162,22 @@ export const routes: Routes = [
             {
                 path: 'sesion/:turnoId',
                 loadComponent: () => import('./features/medica/sesion-tratamiento/sesion-tratamiento.component').then(m => m.SesionTratamientoComponent)
+            },
+            {
+                path: 'programar-sesion',
+                loadComponent: () => import('./features/medica/programar-sesion-standalone/programar-sesion-standalone.component').then(m => m.ProgramarSesionStandaloneComponent)
             }
         ]
     },
+
+    // ============================================
+    // RUTA PÚBLICA - CAPTURA FOTO MÓVIL (QR)
+    // ============================================
+    {
+        path: 'captura-foto/:sessionId/:tipo',
+        loadComponent: () => import('./features/captura-foto-mobile/captura-foto-mobile.component').then(m => m.CapturaFotoMobileComponent)
+    },
+
     // ============================================
     // RUTAS PRIVADAS - RECEPCIONISTA
     // ============================================

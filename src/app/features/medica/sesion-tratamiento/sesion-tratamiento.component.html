@@ -1,77 +1,342 @@
-<div class="max-w-4xl mx-auto p-6 space-y-8">
-    <!-- Header Sesión -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-start">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900">Sesión de Tratamiento</h2>
-            <p class="text-gray-500 mt-1">{{ tratamientoNombre }}</p>
+<div class="min-h-screen bg-white">
+    <!-- LOADING -->
+    @if (loading()) {
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-2 border-black border-t-transparent mx-auto"></div>
+            <p class="mt-3 text-sm font-light text-gray-400">Cargando...</p>
         </div>
-        <div class="text-right">
-            <span
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                Sesión {{ sesionActual }} / {{ totalSesiones }}
-            </span>
-            <p class="text-xs text-gray-400 mt-2">{{ fechaActual | date:'fullDate' }}</p>
+    </div>
+    } @else {
+
+    <!-- HEADER -->
+    <div class="px-8 py-6 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-light text-black">{{ tratamientoPaciente()?.nombreTratamiento }}</h1>
+                    <p class="text-sm font-light text-gray-400 mt-1">{{ paciente()?.nombre }} {{ paciente()?.apellido
+                        }}</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-semibold text-black">Sesión {{ numeroSesion() }} / {{
+                        tratamientoPaciente()?.sesionesTotales }}</div>
+                    <div class="text-xs font-light text-gray-400 mt-1">{{ turno()?.fecha | date:'dd/MM/yyyy' }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Paso 1: Fotografía de Progreso -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
-                📸
+    <!-- STEPPER -->
+    <div class="px-8 py-4 bg-gray-50">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex items-center justify-between">
+                @for (step of [1,2,3,4,5]; track step) {
+                <div class="flex items-center" [class.flex-1]="step < 5">
+                    <!-- Step Circle -->
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full transition-all"
+                        [class.bg-black]="currentStep() >= step" [class.text-white]="currentStep() >= step"
+                        [class.bg-white]="currentStep() < step" [class.text-gray-300]="currentStep() < step"
+                        [class.ring-1]="currentStep() < step" [class.ring-gray-200]="currentStep() < step">
+                        <span class="text-xs font-semibold">{{ step }}</span>
+                    </div>
+
+                    <!-- Line -->
+                    @if (step < 5) { <div class="flex-1 h-px mx-2 transition-all"
+                        [class.bg-black]="currentStep() > step" [class.bg-gray-200]="currentStep() <= step">
+                </div>
+                }
             </div>
-            <h3 class="text-lg font-bold text-gray-900">Registro Fotográfico</h3>
-        </div>
-
-        @if (!fotoSesion()) {
-        <div class="bg-gray-50 rounded-xl p-8 text-center border-2 border-dashed border-gray-200">
-            <p class="text-gray-500 mb-4">Es necesario capturar una foto del progreso antes de finalizar la sesión.</p>
-            <button (click)="mostrarCamara.set(true)" *ngIf="!mostrarCamara()"
-                class="px-6 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors">
-                Abrir Cámara
-            </button>
-
-            @if (mostrarCamara()) {
-            <app-captura-foto (fotoCapturada)="onFotoCapturada($event)"></app-captura-foto>
             }
         </div>
-        } @else {
-        <div class="relative rounded-2xl overflow-hidden bg-black aspect-video group">
-            <img [src]="fotoSesion()" class="w-full h-full object-contain">
-            <div
-                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button (click)="fotoSesion.set(''); mostrarCamara.set(false)"
-                    class="px-4 py-2 bg-white text-gray-900 rounded-lg font-bold">
-                    Retomar Foto
-                </button>
+
+        <!-- Step Labels -->
+        <div class="flex items-center justify-between mt-2">
+            <span class="text-xs font-light" [class.text-black]="currentStep() === 1"
+                [class.text-gray-400]="currentStep() !== 1">Instrucciones</span>
+            <span class="text-xs font-light" [class.text-black]="currentStep() === 2"
+                [class.text-gray-400]="currentStep() !== 2">Próxima Sesión</span>
+            <span class="text-xs font-light" [class.text-black]="currentStep() === 3"
+                [class.text-gray-400]="currentStep() !== 3">Foto Antes</span>
+            <span class="text-xs font-light" [class.text-black]="currentStep() === 4"
+                [class.text-gray-400]="currentStep() !== 4">Notas</span>
+            <span class="text-xs font-light" [class.text-black]="currentStep() === 5"
+                [class.text-gray-400]="currentStep() !== 5">Foto Después</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="px-8 py-8">
+    <div class="max-w-5xl mx-auto">
+
+        <!-- STEP 1: INSTRUCCIONES -->
+        @if (currentStep() === 1) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Instrucciones Post-Sesión</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Verifica y edita las indicaciones para el paciente</p>
+            </div>
+
+            <!-- Lista de instrucciones -->
+            @if (instruccionesPost().length > 0) {
+            <div class="space-y-2 mb-4">
+                @for (instruccion of instruccionesPost(); track $index) {
+                <div class="flex items-start gap-2 p-2 hover:bg-gray-50 transition-colors group">
+                    <span class="text-black mt-0.5 text-sm">•</span>
+                    <span class="text-sm font-light flex-1">{{ instruccion }}</span>
+                    <button (click)="eliminarInstruccion($index)"
+                        class="text-gray-300 hover:text-black text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                        ×
+                    </button>
+                </div>
+                }
+            </div>
+            } @else {
+            <p class="text-sm font-light text-gray-400 py-4">No hay instrucciones agregadas</p>
+            }
+
+            <!-- Input inline para agregar -->
+            <div class="flex gap-1 items-center border-b border-gray-100 pb-2">
+                <input type="text" [(ngModel)]="tempInstruccion" placeholder="Agregar nueva indicación..."
+                    class="flex-1 text-sm font-light border-b border-gray-300 focus:border-black focus:outline-none py-1 bg-transparent"
+                    (keyup.enter)="agregarInstruccion()">
+                <button (click)="agregarInstruccion()"
+                    class="text-black text-sm font-bold w-8 h-8 flex items-center justify-center hover:bg-gray-50 rounded-full">+</button>
             </div>
         </div>
         }
-    </div>
 
-    <!-- Paso 2: Notas de Evolución -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
-                📝
+        <!-- STEP 2: PRÓXIMA SESIÓN -->
+        @if (currentStep() === 2) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Próxima Sesión</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Programa el siguiente encuentro</p>
             </div>
-            <h3 class="text-lg font-bold text-gray-900">Notas de Evolución</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Fecha</label>
+                    <input type="date" [(ngModel)]="fechaProximaSesion"
+                        class="w-full p-3 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Hora</label>
+                    <input type="time" [(ngModel)]="horaProximaSesion"
+                        class="w-full p-3 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <p class="text-xs text-gray-500 leading-relaxed font-light italic">
+                    Nota: El turno se creará automáticamente al finalizar esta sesión.
+                </p>
+            </div>
         </div>
+        }
 
-        <textarea [(ngModel)]="notasSesion" rows="4"
-            class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none"
-            placeholder="Describe el progreso, reacciones del paciente, parámetros utilizados, etc..."></textarea>
+        <!-- STEP 3: FOTO ANTES (Única) -->
+        @if (currentStep() === 3) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Fotografía Antes</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Captura el estado inicial</p>
+            </div>
+
+            @if (mostrarCamaraAntes()) {
+            <div class="mb-6">
+                <app-captura-foto (fotoCapturada)="onFotoAntesCapturada($event)"></app-captura-foto>
+            </div>
+            }
+
+            @if (fotosAntes().length > 0) {
+            <div
+                class="max-w-md mx-auto aspect-square relative group bg-gray-50 border border-gray-100 overflow-hidden rounded-2xl">
+                <img [src]="fotosAntes()[0]" class="w-full h-full object-cover">
+                <div
+                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button (click)="eliminarFotoAntes(0)"
+                        class="px-6 py-2 bg-white text-black text-xs font-semibold rounded-full hover:bg-gray-100 transition-colors">
+                        Eliminar y Repetir
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (!mostrarCamaraAntes() && fotosAntes().length === 0) {
+            <div class="flex gap-4">
+                <button (click)="mostrarCamaraAntes.set(true)"
+                    class="flex-1 py-4 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    <span class="text-lg">📷</span> Cámara PC
+                </button>
+                <button (click)="generarQRParaFoto('antes')"
+                    class="flex-1 py-4 bg-white text-black text-sm font-semibold ring-1 ring-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    <span class="text-lg">📱</span> Cámara Celular
+                </button>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- STEP 4: PROCEDIMIENTO Y NOTAS -->
+        @if (currentStep() === 4) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Procedimiento y Notas</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Describe lo realizado y observaciones clínicas</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Procedimiento
+                        Realizado</label>
+                    <textarea [(ngModel)]="procedimientoRealizado" rows="4"
+                        class="w-full p-3 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none resize-none transition-all"
+                        placeholder="Ej: Aplicación de láser CO2 fraccionado en zona malar..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Productos
+                        Utilizados</label>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" [(ngModel)]="tempProductoNombre" placeholder="Nombre del producto"
+                            class="flex-1 p-2 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none">
+                        <input type="text" [(ngModel)]="tempProductoMarca" placeholder="Marca (opcional)"
+                            class="w-32 p-2 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none">
+                        <button (click)="agregarProducto()"
+                            class="px-4 py-2 bg-black text-white text-sm font-semibold hover:bg-gray-900 rounded-lg">+</button>
+                    </div>
+
+                    @if (productosUsados().length > 0) {
+                    <div class="space-y-1">
+                        @for (producto of productosUsados(); track $index) {
+                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
+                            <div class="text-xs font-light">
+                                <span class="font-semibold">{{ producto.nombre }}</span>
+                                @if (producto.marca) {
+                                <span class="text-gray-400 ml-2">({{ producto.marca }})</span>
+                                }
+                            </div>
+                            <button (click)="eliminarProducto($index)"
+                                class="text-gray-300 hover:text-black text-lg font-light leading-none">×</button>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Notas
+                        Profesionales *</label>
+                    <textarea [(ngModel)]="notasProfesional" rows="3"
+                        class="w-full p-3 text-sm font-light bg-white border border-gray-100 focus:border-black focus:outline-none resize-none transition-all"
+                        placeholder="Observaciones clínicas relevantes..."></textarea>
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- STEP 5: FOTO DESPUÉS (Única) -->
+        @if (currentStep() === 5) {
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold text-black">Fotografía Después</h2>
+                <p class="text-sm font-light text-gray-400 mt-1">Captura el resultado final</p>
+            </div>
+
+            @if (mostrarCamaraDespues()) {
+            <div class="mb-6">
+                <app-captura-foto (fotoCapturada)="onFotoDespuesCapturada($event)"></app-captura-foto>
+            </div>
+            }
+
+            @if (fotosDespues().length > 0) {
+            <div
+                class="max-w-md mx-auto aspect-square relative group bg-gray-50 border border-gray-100 overflow-hidden rounded-2xl">
+                <img [src]="fotosDespues()[0]" class="w-full h-full object-cover">
+                <div
+                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button (click)="eliminarFotoDespues(0)"
+                        class="px-6 py-2 bg-white text-black text-xs font-semibold rounded-full hover:bg-gray-100 transition-colors">
+                        Eliminar y Repetir
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (!mostrarCamaraDespues() && fotosDespues().length === 0) {
+            <div class="flex gap-4">
+                <button (click)="mostrarCamaraDespues.set(true)"
+                    class="flex-1 py-4 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    <span class="text-lg">📷</span> Cámara PC
+                </button>
+                <button (click)="generarQRParaFoto('despues')"
+                    class="flex-1 py-4 bg-white text-black text-sm font-semibold ring-1 ring-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2 rounded-xl">
+                    <span class="text-lg">📱</span> Cámara Celular
+                </button>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- NAVIGATION -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 z-40">
+            <div class="max-w-5xl mx-auto flex items-center justify-between">
+                <button (click)="cancelar()"
+                    class="px-6 py-2 text-sm font-light text-gray-400 hover:text-black transition-colors">
+                    Cancelar
+                </button>
+
+                <div class="flex gap-3">
+                    @if (currentStep() > 1) {
+                    <button (click)="prevStep()"
+                        class="px-8 py-2 text-sm font-semibold text-black hover:bg-gray-50 ring-1 ring-black transition-colors">
+                        ← Anterior
+                    </button>
+                    }
+
+                    @if (currentStep() < totalSteps) { <button (click)="nextStep()"
+                        class="px-8 py-2 bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-colors">
+                        Siguiente →
+                        </button>
+                        } @else {
+                        <button (click)="finalizarSesion()" [disabled]="!esValido() || guardando()"
+                            class="px-8 py-2 bg-black text-white text-sm font-semibold hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            @if (guardando()) {
+                            <span>Guardando...</span>
+                            } @else {
+                            <span>Finalizar Sesión</span>
+                            }
+                        </button>
+                        }
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Acciones Finales -->
-    <div class="flex justify-end gap-4 pt-4">
-        <button (click)="cancelarSesion.emit()"
-            class="px-6 py-3 text-gray-500 font-medium hover:bg-gray-50 rounded-xl transition-colors">
+<!-- Spacer for fixed nav -->
+<div class="h-20"></div>
+
+<!-- MODAL QR CODE -->
+@if (mostrarQR() && qrUrl()) {
+<div class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl max-w-md w-full">
+        <h3 class="text-lg font-semibold mb-4 text-black">Escanea el código QR</h3>
+        <div class="flex justify-center mb-4">
+            <qrcode [qrdata]="qrUrl()!" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+        </div>
+        <p class="text-sm text-gray-500 text-center mb-4">
+            Escanea con tu celular para capturar la foto
+        </p>
+        <button (click)="cerrarQR()"
+            class="w-full py-2 bg-gray-200 text-black rounded-lg font-semibold hover:bg-gray-300">
             Cancelar
         </button>
-        <button (click)="finalizarSesion()" [disabled]="!esValido()"
-            class="px-8 py-3 bg-black text-white font-bold rounded-xl shadow-lg shadow-black/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            Finalizar Sesión
-        </button>
     </div>
+</div>
+}
+
+}
 </div>
