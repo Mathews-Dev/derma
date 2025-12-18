@@ -44,3 +44,94 @@
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #d1d5db;
 }
+
+/* Estilos personalizados para Driver.js */
+:root {
+  --driver-popover-z-index: 10000;
+}
+
+.driverjs-theme .driver-popover {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  max-width: 320px;
+}
+
+.driverjs-theme .driver-popover-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.driverjs-theme .driver-popover-description {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.driverjs-theme .driver-popover-progress-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.driverjs-theme .driver-popover-footer {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.driverjs-theme .driver-popover-prev-btn,
+.driverjs-theme .driver-popover-next-btn,
+.driverjs-theme .driver-popover-close-btn {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.driverjs-theme .driver-popover-prev-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.driverjs-theme .driver-popover-prev-btn:hover {
+  background: #e5e7eb;
+}
+
+.driverjs-theme .driver-popover-next-btn:hover,
+.driverjs-theme .driver-popover-close-btn:hover {
+  background: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.driverjs-theme .driver-popover-arrow {
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.driver-active-element {
+  position: relative;
+  z-index: 9999;
+}
+
+.driver-overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}

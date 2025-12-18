@@ -164,6 +164,9 @@ ng generate service core/services/sesion-tratamiento --skip-tests
 # Instalación QR Code (Fase 3)
 npm install angularx-qrcode --force
 
+# Instalación Driver.js para tours interactivos
+npm install driver.js
+
 # Instalacion y configuración de Tailwind
 npm install tailwindcss @tailwindcss/postcss postcss --force
 

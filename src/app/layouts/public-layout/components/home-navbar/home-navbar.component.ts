@@ -5,6 +5,8 @@ import { ScrollService } from '../../../../core/services/scroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 declare const HSStaticMethods: any;
 
@@ -32,6 +34,63 @@ export class HomeNavbarComponent implements OnInit, AfterViewChecked {
         this.initScrollAnimation(container);
       }
     });
+
+    // Iniciar tour si es la primera visita
+    this.checkAndStartTour();
+  }
+
+  checkAndStartTour() {
+    const hasSeenTour = localStorage.getItem('hasSeenNavTour');
+    if (hasSeenTour) {
+      setTimeout(() => this.startNavTour(), 1000);
+    }
+  }
+
+  startNavTour() {
+    const driverObj = driver({
+      showProgress: true,
+      showButtons: ['next', 'previous', 'close'],
+      progressText: '{{current}} de {{total}}',
+      nextBtnText: 'Siguiente',
+      prevBtnText: 'Anterior',
+      doneBtnText: 'Finalizar',
+      popoverClass: 'driverjs-theme',
+      steps: [
+        {
+          element: '[data-tour="servicios"]',
+          popover: {
+            title: 'Servicios',
+            description: 'Descubre todos nuestros servicios dermatológicos y estéticos especializados.',
+            side: 'bottom',
+            align: 'start'
+          }
+        },
+        {
+          element: '[data-tour="tratamientos"]',
+          popover: {
+            title: 'Tratamientos',
+            description: 'Explora nuestra amplia gama de tratamientos faciales, corporales y quirúrgicos.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="nosotros"]',
+          popover: {
+            title: 'Nosotros',
+            description: 'Conoce a nuestro equipo de profesionales y nuestra filosofía de atención personalizada.',
+            side: 'bottom',
+            align: 'end'
+          }
+        }
+      ],
+      onDestroyStarted: () => {
+        localStorage.setItem('hasSeenNavTour', 'true');
+        driverObj.destroy();
+      }
+    });
+
+    driverObj.drive();
   }
 
   initScrollAnimation(scroller: HTMLElement) {

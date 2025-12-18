@@ -88,6 +88,11 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
   mostrarQR = signal<boolean>(false);
   private qrSubscription?: Subscription;
 
+  // Vista ampliada de fotos
+  fotoAmpliada = signal<string | null>(null);
+  tipoFotoAmpliada = signal<'antes' | 'despues' | 'consentimiento' | null>(null);
+  mostrarFotoAmpliada = signal<boolean>(false);
+
   // Modal de programación (ya no se usa, pero lo dejo por compatibilidad)
   showSchedulingModal = signal<boolean>(false);
   schedulingData = signal<{ pacienteId: string; profesionalId: string; tratamientoNombre: string } | null>(null);
@@ -262,6 +267,44 @@ export class SesionTratamientoComponent implements OnInit, OnDestroy {
 
   eliminarFotoDespues(index: number) {
     this.fotosDespues.set([]);
+  }
+
+  // === VISTA AMPLIADA DE FOTOS ===
+  ampliarFoto(base64: string, tipo: 'antes' | 'despues' | 'consentimiento') {
+    this.fotoAmpliada.set(base64);
+    this.tipoFotoAmpliada.set(tipo);
+    this.mostrarFotoAmpliada.set(true);
+  }
+
+  cerrarFotoAmpliada() {
+    this.mostrarFotoAmpliada.set(false);
+    this.fotoAmpliada.set(null);
+    this.tipoFotoAmpliada.set(null);
+  }
+
+  eliminarFotoAmpliada() {
+    if (!confirm('¿Eliminar esta foto?')) return;
+
+    const tipo = this.tipoFotoAmpliada();
+    if (tipo === 'antes') {
+      this.fotosAntes.set([]);
+    } else if (tipo === 'despues') {
+      this.fotosDespues.set([]);
+    } else if (tipo === 'consentimiento') {
+      this.documentoConsentimiento.set(null);
+    }
+
+    this.cerrarFotoAmpliada();
+  }
+
+  retomarFotoAmpliada() {
+    const tipo = this.tipoFotoAmpliada();
+    this.cerrarFotoAmpliada();
+
+    // Abrir QR para tomar nueva foto
+    if (tipo) {
+      this.generarQRParaFoto(tipo);
+    }
   }
 
   // === PRODUCTOS ===
